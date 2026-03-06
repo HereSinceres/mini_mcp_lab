@@ -1,0 +1,10 @@
+{
+  "name": "mini-codex-mcp-lab",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "host": "node src/host/index.js",
+    "server": "node src/server/notes-mcp-server.js"
+  }
+}

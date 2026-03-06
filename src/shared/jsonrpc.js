@@ -1,0 +1,108 @@
+import readline from "node:readline";
+
+export class JsonRpcPeer {
+  constructor({ input, output, onNotification = () => {} }) {
+    this.input = input;
+    this.output = output;
+    this.onNotification = onNotification;
+    this.pending = new Map();
+    this.handlers = new Map();
+    this.id = 1;
+
+    const rl = readline.createInterface({ input });
+    rl.on("line", (line) => {
+      if (!line.trim()) return;
+      let msg;
+      try {
+        msg = JSON.parse(line);
+      } catch (err) {
+        console.error("[jsonrpc] invalid json:", line);
+        return;
+      }
+      this.#handleMessage(msg);
+    });
+  }
+
+  register(method, handler) {
+    this.handlers.set(method, handler);
+  }
+
+  notify(method, params = {}) {
+    const msg = {
+      jsonrpc: "2.0",
+      method,
+      params,
+    };
+    this.output.write(JSON.stringify(msg) + "\n");
+  }
+
+  request(method, params = {}) {
+    const id = this.id++;
+    const msg = {
+      jsonrpc: "2.0",
+      id,
+      method,
+      params,
+    };
+    this.output.write(JSON.stringify(msg) + "\n");
+
+    return new Promise((resolve, reject) => {
+      this.pending.set(id, { resolve, reject });
+    });
+  }
+
+  async #handleMessage(msg) {
+    if (msg.method && Object.prototype.hasOwnProperty.call(msg, "id")) {
+      const handler = this.handlers.get(msg.method);
+      if (!handler) {
+        this.#sendError(msg.id, -32601, `Method not found: ${msg.method}`);
+        return;
+      }
+
+      try {
+        const result = await handler(msg.params ?? {});
+        this.#sendResult(msg.id, result);
+      } catch (err) {
+        this.#sendError(msg.id, -32000, err?.message || "Internal error");
+      }
+      return;
+    }
+
+    if (msg.method && !Object.prototype.hasOwnProperty.call(msg, "id")) {
+      this.onNotification(msg.method, msg.params ?? {});
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(msg, "id")) {
+      const pending = this.pending.get(msg.id);
+      if (!pending) return;
+      this.pending.delete(msg.id);
+
+      if (msg.error) {
+        pending.reject(new Error(msg.error.message || "Unknown RPC error"));
+      } else {
+        pending.resolve(msg.result);
+      }
+    }
+  }
+
+  #sendResult(id, result) {
+    this.output.write(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        id,
+        result,
+      }) + "\n",
+    );
+  }
+
+  #sendError(id, code, message) {
+    this.output.write(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        id,
+        error: { code, message },
+      }) + "\n",
+    );
+  }
+}
