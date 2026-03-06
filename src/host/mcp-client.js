@@ -3,36 +3,43 @@ import { JsonRpcPeer } from "../shared/jsonrpc.js";
 import { METHODS } from "../shared/protocol.js";
 
 export class McpClient {
-  constructor() {
+  constructor({ id, label, command, args = [] }) {
+    this.id = id;
+    this.label = label;
+    this.command = command;
+    this.args = args;
     this.child = null;
     this.peer = null;
+    this.tools = [];
   }
 
   async connect() {
-    this.child = spawn(process.execPath, ["src/server/notes-mcp-server.js"], {
+    this.child = spawn(this.command, this.args, {
       stdio: ["pipe", "pipe", "inherit"],
     });
 
     this.peer = new JsonRpcPeer({
       input: this.child.stdout,
       output: this.child.stdin,
-      onNotification(method, params) {
-        console.log(`[server-notify] ${method}`, params);
+      onNotification: (method, params) => {
+        console.log(
+          `[notify:${this.label}] ${method} ${JSON.stringify(params)}`,
+        );
       },
+      onError: (...args) => console.error(...args),
     });
 
-    const initResult = await this.peer.request(METHODS.INITIALIZE, {
-      clientInfo: {
-        name: "mini-codex-host",
-        version: "1.0.0",
-      },
+    const init = await this.peer.request(METHODS.INITIALIZE, {
+      clientInfo: { name: "mini-codex-host-v2", version: "2.0.0" },
     });
 
-    return initResult;
+    const list = await this.peer.request(METHODS.TOOLS_LIST, {});
+    this.tools = list.tools || [];
+    return { init, tools: this.tools };
   }
 
-  async listTools() {
-    return this.peer.request(METHODS.TOOLS_LIST, {});
+  hasTool(toolName) {
+    return this.tools.some((t) => t.name === toolName);
   }
 
   async callTool(name, args = {}) {
@@ -43,8 +50,6 @@ export class McpClient {
   }
 
   async close() {
-    if (this.child) {
-      this.child.kill();
-    }
+    if (this.child) this.child.kill();
   }
 }

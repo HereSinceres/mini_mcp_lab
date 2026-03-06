@@ -1,0 +1,274 @@
+{
+  "threads": [
+    {
+      "id": "thread_1772791448423_tuoxpf",
+      "title": "Demo Thread",
+      "createdAt": "2026-03-06T10:04:08.423Z",
+      "updatedAt": "2026-03-06T10:12:25.461Z",
+      "turns": [
+        {
+          "id": "turn_1772791826519_x85rt7",
+          "createdAt": "2026-03-06T10:10:26.519Z",
+          "user": "threads",
+          "plan": {
+            "type": "builtin",
+            "action": "list_threads"
+          },
+          "assistant": "[\n  {\n    \"id\": \"thread_1772791448423_tuoxpf\",\n    \"title\": \"Demo Thread\",\n    \"turns\": 0,\n    \"updatedAt\": \"2026-03-06T10:04:08.423Z\"\n  }\n]"
+        },
+        {
+          "id": "turn_1772791837409_tsupsy",
+          "createdAt": "2026-03-06T10:10:37.409Z",
+          "user": "tools",
+          "plan": {
+            "type": "builtin",
+            "action": "list_tools"
+          },
+          "assistant": "[\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"list_dir\",\n    \"description\": \"List files under a workspace-relative directory\"\n  },\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"read_file\",\n    \"description\": \"Read a workspace-relative UTF-8 file\"\n  },\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"write_file\",\n    \"description\": \"Overwrite a workspace-relative UTF-8 file\"\n  },\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"append_file\",\n    \"description\": \"Append text to a workspace-relative UTF-8 file\"\n  },\n  {\n    \"serverId\": \"math\",\n    \"serverLabel\": \"math\",\n    \"name\": \"calc\",\n    \"description\": \"Evaluate a simple math expression\"\n  }\n]"
+        },
+        {
+          "id": "turn_1772791875975_cghlul",
+          "createdAt": "2026-03-06T10:11:15.975Z",
+          "user": "write notes/today.txt | hello mcp",
+          "plan": {
+            "type": "tool",
+            "toolName": "write_file",
+            "args": {
+              "path": "notes/today.txt",
+              "content": "hello mcp"
+            }
+          },
+          "toolCall": {
+            "server": "filesystem",
+            "name": "write_file",
+            "args": {
+              "path": "notes/today.txt",
+              "content": "hello mcp"
+            },
+            "approved": true
+          },
+          "toolResult": {
+            "content": {
+              "ok": true,
+              "path": "notes/today.txt",
+              "bytes": 9
+            }
+          },
+          "assistant": "写入成功：{\n  \"ok\": true,\n  \"path\": \"notes/today.txt\",\n  \"bytes\": 9\n}"
+        },
+        {
+          "id": "turn_1772791891586_xyyrxu",
+          "createdAt": "2026-03-06T10:11:31.586Z",
+          "user": "write notes/today.txt | hello mcp",
+          "plan": {
+            "type": "tool",
+            "toolName": "write_file",
+            "args": {
+              "path": "notes/today.txt",
+              "content": "hello mcp"
+            }
+          },
+          "toolCall": {
+            "server": "filesystem",
+            "name": "write_file",
+            "args": {
+              "path": "notes/today.txt",
+              "content": "hello mcp"
+            },
+            "approved": true
+          },
+          "toolResult": {
+            "content": {
+              "ok": true,
+              "path": "notes/today.txt",
+              "bytes": 9
+            }
+          },
+          "assistant": "写入成功：{\n  \"ok\": true,\n  \"path\": \"notes/today.txt\",\n  \"bytes\": 9\n}"
+        },
+        {
+          "id": "turn_1772791905049_j4aj4s",
+          "createdAt": "2026-03-06T10:11:45.049Z",
+          "user": "write notes/today.txt | hello mcp2",
+          "plan": {
+            "type": "tool",
+            "toolName": "write_file",
+            "args": {
+              "path": "notes/today.txt",
+              "content": "hello mcp2"
+            }
+          },
+          "toolCall": {
+            "server": "filesystem",
+            "name": "write_file",
+            "args": {
+              "path": "notes/today.txt",
+              "content": "hello mcp2"
+            },
+            "approved": true
+          },
+          "toolResult": {
+            "content": {
+              "ok": true,
+              "path": "notes/today.txt",
+              "bytes": 10
+            }
+          },
+          "assistant": "写入成功：{\n  \"ok\": true,\n  \"path\": \"notes/today.txt\",\n  \"bytes\": 10\n}"
+        },
+        {
+          "id": "turn_1772791909875_k163y4",
+          "createdAt": "2026-03-06T10:11:49.875Z",
+          "user": "tool",
+          "plan": {
+            "type": "answer",
+            "text": "支持命令：\n  tools\n  threads\n  ls / list\n  read <path>\n  write <path> | <content>\n  append <path> | <content>\n  calc <expression>"
+          },
+          "assistant": "支持命令：\n  tools\n  threads\n  ls / list\n  read <path>\n  write <path> | <content>\n  append <path> | <content>\n  calc <expression>"
+        },
+        {
+          "id": "turn_1772791911259_o2b98o",
+          "createdAt": "2026-03-06T10:11:51.259Z",
+          "user": "list",
+          "plan": {
+            "type": "tool",
+            "toolName": "list_dir",
+            "args": {
+              "dir": "."
+            }
+          },
+          "toolCall": {
+            "server": "filesystem",
+            "name": "list_dir",
+            "args": {
+              "dir": "."
+            },
+            "approved": true
+          },
+          "toolResult": {
+            "content": [
+              {
+                "name": "notes",
+                "type": "dir"
+              }
+            ]
+          },
+          "assistant": "目录内容：\n[\n  {\n    \"name\": \"notes\",\n    \"type\": \"dir\"\n  }\n]"
+        },
+        {
+          "id": "turn_1772791913508_izoihd",
+          "createdAt": "2026-03-06T10:11:53.508Z",
+          "user": "tool",
+          "plan": {
+            "type": "answer",
+            "text": "支持命令：\n  tools\n  threads\n  ls / list\n  read <path>\n  write <path> | <content>\n  append <path> | <content>\n  calc <expression>"
+          },
+          "assistant": "支持命令：\n  tools\n  threads\n  ls / list\n  read <path>\n  write <path> | <content>\n  append <path> | <content>\n  calc <expression>"
+        },
+        {
+          "id": "turn_1772791919075_9m031j",
+          "createdAt": "2026-03-06T10:11:59.075Z",
+          "user": "ls",
+          "plan": {
+            "type": "tool",
+            "toolName": "list_dir",
+            "args": {
+              "dir": "."
+            }
+          },
+          "toolCall": {
+            "server": "filesystem",
+            "name": "list_dir",
+            "args": {
+              "dir": "."
+            },
+            "approved": true
+          },
+          "toolResult": {
+            "content": [
+              {
+                "name": "notes",
+                "type": "dir"
+              }
+            ]
+          },
+          "assistant": "目录内容：\n[\n  {\n    \"name\": \"notes\",\n    \"type\": \"dir\"\n  }\n]"
+        },
+        {
+          "id": "turn_1772791925950_6vee0r",
+          "createdAt": "2026-03-06T10:12:05.950Z",
+          "user": "tools",
+          "plan": {
+            "type": "builtin",
+            "action": "list_tools"
+          },
+          "assistant": "[\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"list_dir\",\n    \"description\": \"List files under a workspace-relative directory\"\n  },\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"read_file\",\n    \"description\": \"Read a workspace-relative UTF-8 file\"\n  },\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"write_file\",\n    \"description\": \"Overwrite a workspace-relative UTF-8 file\"\n  },\n  {\n    \"serverId\": \"fs\",\n    \"serverLabel\": \"filesystem\",\n    \"name\": \"append_file\",\n    \"description\": \"Append text to a workspace-relative UTF-8 file\"\n  },\n  {\n    \"serverId\": \"math\",\n    \"serverLabel\": \"math\",\n    \"name\": \"calc\",\n    \"description\": \"Evaluate a simple math expression\"\n  }\n]"
+        },
+        {
+          "id": "turn_1772791928634_yipneq",
+          "createdAt": "2026-03-06T10:12:08.634Z",
+          "user": "tool",
+          "plan": {
+            "type": "answer",
+            "text": "支持命令：\n  tools\n  threads\n  ls / list\n  read <path>\n  write <path> | <content>\n  append <path> | <content>\n  calc <expression>"
+          },
+          "assistant": "支持命令：\n  tools\n  threads\n  ls / list\n  read <path>\n  write <path> | <content>\n  append <path> | <content>\n  calc <expression>"
+        },
+        {
+          "id": "turn_1772791940864_jnyzbn",
+          "createdAt": "2026-03-06T10:12:20.864Z",
+          "user": "calc 1+2",
+          "plan": {
+            "type": "tool",
+            "toolName": "calc",
+            "args": {
+              "expression": "1+2"
+            }
+          },
+          "toolCall": {
+            "server": "math",
+            "name": "calc",
+            "args": {
+              "expression": "1+2"
+            },
+            "approved": true
+          },
+          "toolResult": {
+            "content": {
+              "expression": "1+2",
+              "value": 3
+            }
+          },
+          "assistant": "计算结果：1+2 = 3"
+        },
+        {
+          "id": "turn_1772791945460_l1taau",
+          "createdAt": "2026-03-06T10:12:25.461Z",
+          "user": "calc 1-+2",
+          "plan": {
+            "type": "tool",
+            "toolName": "calc",
+            "args": {
+              "expression": "1-+2"
+            }
+          },
+          "toolCall": {
+            "server": "math",
+            "name": "calc",
+            "args": {
+              "expression": "1-+2"
+            },
+            "approved": true
+          },
+          "toolResult": {
+            "content": {
+              "expression": "1-+2",
+              "value": -1
+            }
+          },
+          "assistant": "计算结果：1-+2 = -1"
+        }
+      ]
+    }
+  ]
+}

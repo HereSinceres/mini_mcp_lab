@@ -1,25 +1,33 @@
 import readline from "node:readline";
 
 export class JsonRpcPeer {
-  constructor({ input, output, onNotification = () => {} }) {
+  constructor({
+    input,
+    output,
+    onNotification = () => {},
+    onError = console.error,
+  }) {
     this.input = input;
     this.output = output;
     this.onNotification = onNotification;
+    this.onError = onError;
     this.pending = new Map();
     this.handlers = new Map();
-    this.id = 1;
+    this.nextId = 1;
 
     const rl = readline.createInterface({ input });
     rl.on("line", (line) => {
       if (!line.trim()) return;
+
       let msg;
       try {
         msg = JSON.parse(line);
       } catch (err) {
-        console.error("[jsonrpc] invalid json:", line);
+        this.onError("[jsonrpc] invalid json:", line);
         return;
       }
-      this.#handleMessage(msg);
+
+      this.#handle(msg);
     });
   }
 
@@ -27,36 +35,41 @@ export class JsonRpcPeer {
     this.handlers.set(method, handler);
   }
 
-  notify(method, params = {}) {
-    const msg = {
-      jsonrpc: "2.0",
-      method,
-      params,
-    };
-    this.output.write(JSON.stringify(msg) + "\n");
-  }
-
   request(method, params = {}) {
-    const id = this.id++;
-    const msg = {
-      jsonrpc: "2.0",
-      id,
-      method,
-      params,
-    };
-    this.output.write(JSON.stringify(msg) + "\n");
+    const id = this.nextId++;
+    this.output.write(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        id,
+        method,
+        params,
+      }) + "\n",
+    );
 
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
     });
   }
 
-  async #handleMessage(msg) {
+  notify(method, params = {}) {
+    this.output.write(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        method,
+        params,
+      }) + "\n",
+    );
+  }
+
+  async #handle(msg) {
     if (msg.method && Object.prototype.hasOwnProperty.call(msg, "id")) {
       const handler = this.handlers.get(msg.method);
       if (!handler) {
-        this.#sendError(msg.id, -32601, `Method not found: ${msg.method}`);
-        return;
+        return this.#sendError(
+          msg.id,
+          -32601,
+          `Method not found: ${msg.method}`,
+        );
       }
 
       try {
@@ -79,7 +92,7 @@ export class JsonRpcPeer {
       this.pending.delete(msg.id);
 
       if (msg.error) {
-        pending.reject(new Error(msg.error.message || "Unknown RPC error"));
+        pending.reject(new Error(msg.error.message || "RPC Error"));
       } else {
         pending.resolve(msg.result);
       }

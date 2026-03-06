@@ -7,6 +7,6 @@ export const METHODS = {
 export const NOTIFICATIONS = {
   LOG: "log",
   TOOL_STARTED: "tool/started",
-  TOOL_FINISHED: "tool/finished",
-  APPROVAL_REQUIRED: "approval/required"
+  TOOL_PROGRESS: "tool/progress",
+  TOOL_FINISHED: "tool/finished"
 };

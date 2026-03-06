@@ -1,78 +1,85 @@
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import path from "node:path";
 import { McpClient } from "./mcp-client.js";
-import { plan } from "./planner.js";
-
-function pretty(value) {
-  return JSON.stringify(value, null, 2);
-}
-
-async function askApproval(question, rl) {
-  const answer = await rl.question(`${question} (y/n): `);
-  return /^y(es)?$/i.test(answer.trim());
-}
+import { ThreadStore } from "./thread-store.js";
+import { AgentRuntime } from "./agent.js";
 
 async function main() {
   const rl = readline.createInterface({ input, output });
-  const client = new McpClient();
+  const threadStore = new ThreadStore();
 
-  console.log("Connecting MCP server...");
-  const init = await client.connect();
-  console.log("Connected:", pretty(init));
+  const clients = [
+    new McpClient({
+      id: "fs",
+      label: "filesystem",
+      command: process.execPath,
+      args: [path.resolve("src/servers/fs-server.js")],
+    }),
+    new McpClient({
+      id: "math",
+      label: "math",
+      command: process.execPath,
+      args: [path.resolve("src/servers/math-server.js")],
+    }),
+  ];
 
-  const tools = await client.listTools();
-  console.log("Available tools:", pretty(tools));
+  console.log("Connecting MCP servers...\n");
 
-  console.log("\nMini Codex MCP Lab");
-  console.log("Commands:");
-  console.log("  add 标题 | 内容");
-  console.log("  list");
-  console.log("  search 关键词");
-  console.log("  exit\n");
+  for (const client of clients) {
+    const res = await client.connect();
+    console.log(`[connected] ${client.label}`);
+    console.log(`tools: ${res.tools.map((t) => t.name).join(", ")}`);
+    console.log("");
+  }
+
+  const thread = await threadStore.createThread("Demo Thread");
+
+  const agent = new AgentRuntime({
+    clients,
+    threadStore,
+    askApproval: async (question) => {
+      const ans = await rl.question(`${question} (y/n): `);
+      return /^y(es)?$/i.test(ans.trim());
+    },
+  });
+
+  console.log("Mini Codex MCP Lab v2");
+  console.log(`threadId = ${thread.id}`);
+  console.log("");
+  console.log("Try:");
+  console.log("  tools");
+  console.log("  threads");
+  console.log("  ls");
+  console.log("  write notes/today.txt | hello mcp");
+  console.log("  append notes/today.txt | \\nsecond line");
+  console.log("  read notes/today.txt");
+  console.log("  calc (3 + 5) * 9");
+  console.log("  exit");
+  console.log("");
 
   while (true) {
     const userInput = await rl.question("> ");
     if (userInput.trim() === "exit") break;
 
-    const step = plan(userInput);
-
-    if (step.type === "answer") {
-      console.log(step.text);
-      continue;
-    }
-
-    const approved = await askApproval(
-      `允许调用工具 ${step.toolName}，参数 ${pretty(step.args)} ?`,
-      rl,
-    );
-
-    if (!approved) {
-      console.log("已拒绝工具调用。");
-      continue;
-    }
-
     try {
-      const result = await client.callTool(step.toolName, step.args);
-      console.log("\n[tool result]");
-      console.log(pretty(result));
+      const out = await agent.runTurn({
+        threadId: thread.id,
+        userInput,
+      });
 
-      console.log("\n[agent answer]");
-      if (step.toolName === "list_notes") {
-        const notes = result.content || [];
-        console.log(`共有 ${notes.length} 条笔记`);
-      } else if (step.toolName === "search_notes") {
-        const notes = result.content || [];
-        console.log(`搜索到 ${notes.length} 条结果`);
-      } else if (step.toolName === "add_note") {
-        console.log(`已新增笔记：${result.content?.title}`);
-      }
+      console.log("\n[assistant]");
+      console.log(out.assistant);
       console.log("");
     } catch (err) {
-      console.error("[host error]", err.message);
+      console.error("[error]", err.message);
+      console.log("");
     }
   }
 
-  await client.close();
+  for (const client of clients) {
+    await client.close();
+  }
   rl.close();
 }
 
