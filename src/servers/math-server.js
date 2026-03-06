@@ -23,7 +23,7 @@ peer.register(METHODS.INITIALIZE, async (params) => {
   return {
     serverInfo: {
       name: "math-server",
-      version: "3.0.0",
+      version: "4.0.0",
     },
     capabilities: {
       tools: true,
@@ -51,7 +51,6 @@ peer.register(METHODS.TOOLS_LIST, async () => {
 
 peer.register(METHODS.TOOLS_CALL, async (params) => {
   const { name, arguments: args = {} } = params || {};
-
   peer.notify(NOTIFICATIONS.TOOL_STARTED, { name, args });
 
   if (name !== "calc") {

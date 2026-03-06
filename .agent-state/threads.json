@@ -868,6 +868,25 @@
           "assistant": "已成功将今日TODO「看牙医」记录到todo.txt文件中，记录操作完成。"
         }
       ]
+    },
+    {
+      "id": "thread_1772800585777_u98t8g",
+      "title": "Demo Thread v4",
+      "createdAt": "2026-03-06T12:36:25.777Z",
+      "updatedAt": "2026-03-06T12:36:31.222Z",
+      "turns": [
+        {
+          "id": "turn_1772800591222_bb6jiy",
+          "createdAt": "2026-03-06T12:36:31.222Z",
+          "user": "tools",
+          "plan": {
+            "type": "builtin",
+            "action": "list_tools"
+          },
+          "steps": [],
+          "assistant": "[\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"list_dir\",\n    \"description\": \"List files under a workspace-relative directory\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"read_file\",\n    \"description\": \"Read a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"write_file\",\n    \"description\": \"Overwrite a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"append_file\",\n    \"description\": \"Append text to a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"math\",\n    \"name\": \"calc\",\n    \"description\": \"Evaluate a simple math expression\"\n  }\n]"
+        }
+      ]
     }
   ]
 }

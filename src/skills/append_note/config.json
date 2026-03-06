@@ -1,0 +1,6 @@
+{
+  "name": "append_note",
+  "trigger": "append_note",
+  "description": "Append text to a file and then read it back",
+  "tools": ["append_file", "read_file"]
+}

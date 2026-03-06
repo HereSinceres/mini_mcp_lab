@@ -1,0 +1,6 @@
+{
+  "name": "summarize_file",
+  "trigger": "summarize_file",
+  "description": "Read a file and summarize it into 3 bullets",
+  "tools": ["read_file"]
+}

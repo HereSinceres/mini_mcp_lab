@@ -1,0 +1,6 @@
+{
+  "name": "calculate",
+  "trigger": "calculate",
+  "description": "Evaluate a math expression via MCP math tool",
+  "tools": ["calc"]
+}

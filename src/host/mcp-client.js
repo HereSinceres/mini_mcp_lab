@@ -29,20 +29,20 @@ export class McpClient {
       onError: (...args) => console.error(...args),
     });
 
-    const init = await this.peer.request(METHODS.INITIALIZE, {
+    await this.peer.request(METHODS.INITIALIZE, {
       clientInfo: {
-        name: "mini-codex-host-v3",
-        version: "3.0.0",
+        name: "mini-codex-host-v4",
+        version: "4.0.0",
       },
     });
 
     const list = await this.peer.request(METHODS.TOOLS_LIST, {});
     this.tools = list.tools || [];
-    return { init, tools: this.tools };
+    return this.tools;
   }
 
-  hasTool(name) {
-    return this.tools.some((t) => t.name === name);
+  hasTool(toolName) {
+    return this.tools.some((t) => t.name === toolName);
   }
 
   async callTool(name, args = {}) {

@@ -26,16 +26,6 @@ export class ThreadStore {
     return thread;
   }
 
-  async getThread(threadId) {
-    const db = await this.load();
-    return db.threads.find((t) => t.id === threadId) || null;
-  }
-
-  async listThreads() {
-    const db = await this.load();
-    return db.threads;
-  }
-
   async appendTurn(threadId, turn) {
     const db = await this.load();
     const thread = db.threads.find((t) => t.id === threadId);
@@ -49,8 +39,12 @@ export class ThreadStore {
 
     thread.turns.push(item);
     thread.updatedAt = nowIso();
-
     await this.save(db);
     return item;
+  }
+
+  async listThreads() {
+    const db = await this.load();
+    return db.threads;
   }
 }

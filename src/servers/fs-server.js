@@ -20,17 +20,17 @@ const peer = new JsonRpcPeer({
 });
 
 peer.register(METHODS.INITIALIZE, async (params) => {
+  await fs.mkdir(ROOT, { recursive: true });
+
   peer.notify(NOTIFICATIONS.LOG, {
     level: "info",
     message: `fs-server initialized by ${params?.clientInfo?.name || "unknown"}`,
   });
 
-  await fs.mkdir(ROOT, { recursive: true });
-
   return {
     serverInfo: {
       name: "fs-server",
-      version: "3.0.0",
+      version: "4.0.0",
     },
     capabilities: {
       tools: true,
@@ -92,7 +92,6 @@ peer.register(METHODS.TOOLS_LIST, async () => {
 
 peer.register(METHODS.TOOLS_CALL, async (params) => {
   const { name, arguments: args = {} } = params || {};
-
   peer.notify(NOTIFICATIONS.TOOL_STARTED, { name, args });
 
   let result;
@@ -102,9 +101,9 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
     await fs.mkdir(dir, { recursive: true });
     const items = await fs.readdir(dir, { withFileTypes: true });
     result = {
-      content: items.map((x) => ({
-        name: x.name,
-        type: x.isDirectory() ? "dir" : "file",
+      content: items.map((item) => ({
+        name: item.name,
+        type: item.isDirectory() ? "dir" : "file",
       })),
     };
   } else if (name === "read_file") {
@@ -114,9 +113,7 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
   } else if (name === "write_file") {
     const file = assertSafePath(args.path);
     await fs.mkdir(path.dirname(file), { recursive: true });
-
     peer.notify(NOTIFICATIONS.TOOL_PROGRESS, { name, percent: 50 });
-
     await fs.writeFile(file, args.content, "utf8");
     result = {
       content: {

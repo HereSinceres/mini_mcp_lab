@@ -1,51 +1,126 @@
-export function plan(userInput) {
-  const text = userInput.trim();
+export function planInput({ userInput, skills }) {
+  const text = String(userInput || "").trim();
 
-  if (/^list\b|^show\b|查看|列出/.test(text)) {
+  if (/^(tools)$/i.test(text)) {
+    return { type: "builtin", action: "list_tools" };
+  }
+
+  if (/^(skills)$/i.test(text)) {
+    return { type: "builtin", action: "list_skills" };
+  }
+
+  if (/^(threads|history)$/i.test(text)) {
+    return { type: "builtin", action: "list_threads" };
+  }
+
+  if (/^ls$|^list$/i.test(text)) {
     return {
       type: "tool",
-      toolName: "list_notes",
-      args: {},
+      toolName: "list_dir",
+      args: { dir: "." },
     };
   }
 
-  if (/^search\b|搜索|查找/.test(text)) {
-    const keyword = text
-      .replace(/^search\b/i, "")
-      .replace(/搜索|查找/g, "")
-      .trim();
-
+  if (/^read\b/i.test(text)) {
     return {
       type: "tool",
-      toolName: "search_notes",
-      args: { keyword },
-    };
-  }
-
-  if (/^add\b|新增|添加/.test(text)) {
-    const body = text
-      .replace(/^add\b/i, "")
-      .replace(/新增|添加/g, "")
-      .trim();
-
-    const [title, ...rest] = body.split("|");
-    return {
-      type: "tool",
-      toolName: "add_note",
+      toolName: "read_file",
       args: {
-        title: (title || "").trim() || "Untitled",
-        content: rest.join("|").trim() || "",
+        path: text.replace(/^read\b/i, "").trim(),
       },
+    };
+  }
+
+  if (/^write\b/i.test(text)) {
+    const body = text.replace(/^write\b/i, "").trim();
+    const [file, ...rest] = body.split("|");
+    return {
+      type: "tool",
+      toolName: "write_file",
+      args: {
+        path: (file || "").trim(),
+        content: rest.join("|").trim(),
+      },
+    };
+  }
+
+  if (/^append\b/i.test(text)) {
+    const body = text.replace(/^append\b/i, "").trim();
+    const [file, ...rest] = body.split("|");
+    return {
+      type: "tool",
+      toolName: "append_file",
+      args: {
+        path: (file || "").trim(),
+        content: rest.join("|").trim(),
+      },
+    };
+  }
+
+  if (/^calc\b/i.test(text)) {
+    return {
+      type: "tool",
+      toolName: "calc",
+      args: {
+        expression: text.replace(/^calc\b/i, "").trim(),
+      },
+    };
+  }
+
+  const matchedSkill = matchSkill(text, skills);
+  if (matchedSkill) {
+    return {
+      type: "skill",
+      skillName: matchedSkill.name,
+      args: extractSkillArgs(text, matchedSkill),
     };
   }
 
   return {
     type: "answer",
     text: [
-      "我现在支持这些命令：",
-      "1. add 标题 | 内容",
-      "2. list",
-      "3. search 关键词",
+      "支持命令：",
+      "  tools",
+      "  skills",
+      "  threads",
+      "  ls",
+      "  read <path>",
+      "  write <path> | <content>",
+      "  append <path> | <content>",
+      "  calc <expression>",
+      "  summarize_file <path>",
+      "  append_note <path> | <content>",
+      "  calculate <expression>",
     ].join("\n"),
   };
+}
+
+function matchSkill(text, skills) {
+  return (
+    skills.find((skill) => {
+      return text.startsWith(skill.trigger);
+    }) || null
+  );
+}
+
+function extractSkillArgs(text, skill) {
+  const raw = text.slice(skill.trigger.length).trim();
+
+  if (skill.name === "summarize_file") {
+    return { path: raw };
+  }
+
+  if (skill.name === "append_note") {
+    const [path, ...rest] = raw.split("|");
+    return {
+      path: (path || "").trim(),
+      content: rest.join("|").trim(),
+    };
+  }
+
+  if (skill.name === "calculate") {
+    return { expression: raw };
+  }
+
+  return { raw };
 }
