@@ -1,24 +1,29 @@
-export async function planWithLLM({ userInput, tools, callModel }) {
+export async function planWithLLM({
+  userInput,
+  state,
+  toolCatalog,
+  callModel,
+}) {
   const systemPrompt = [
-    "You are a planner for a local coding agent.",
-    "Given the user input and available tools, decide either:",
-    "1) answer directly",
-    "2) call exactly one tool",
-    "Return strict JSON only.",
+    "You are the planner for a local coding agent.",
+    "You may decide one of three outputs:",
+    '1) {"type":"tool","toolName":"...","args":{},"reason":"..."}',
+    '2) {"type":"answer","text":"..."}',
+    '3) {"type":"done"}',
     "",
-    "JSON schema:",
-    "{",
-    '  "type": "answer" | "tool",',
-    '  "text"?: string,',
-    '  "toolName"?: string,',
-    '  "args"?: object',
-    "}",
+    "Rules:",
+    "- Return strict JSON only.",
+    "- At most one tool per step.",
+    "- If the user asks summarize_file <path>, first call read_file.",
+    "- After read_file for summarize_file, return an answer summarizing the content.",
+    "- Prefer available tools only.",
   ].join("\n");
 
   const userPrompt = JSON.stringify(
     {
       userInput,
-      tools,
+      state,
+      toolCatalog,
     },
     null,
     2,
@@ -30,5 +35,6 @@ export async function planWithLLM({ userInput, tools, callModel }) {
   if (!parsed || !parsed.type) {
     throw new Error("Invalid planner response");
   }
+
   return parsed;
 }

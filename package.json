@@ -1,6 +1,6 @@
 {
-  "name": "mini-codex-mcp-lab-v2",
-  "version": "2.0.0",
+  "name": "mini-codex-mcp-lab-v3",
+  "version": "3.0.0",
   "type": "module",
   "private": true,
   "scripts": {

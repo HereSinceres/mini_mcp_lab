@@ -22,7 +22,7 @@ export class JsonRpcPeer {
       let msg;
       try {
         msg = JSON.parse(line);
-      } catch (err) {
+      } catch {
         this.onError("[jsonrpc] invalid json:", line);
         return;
       }

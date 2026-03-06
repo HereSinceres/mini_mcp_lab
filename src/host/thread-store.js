@@ -31,23 +31,26 @@ export class ThreadStore {
     return db.threads.find((t) => t.id === threadId) || null;
   }
 
+  async listThreads() {
+    const db = await this.load();
+    return db.threads;
+  }
+
   async appendTurn(threadId, turn) {
     const db = await this.load();
     const thread = db.threads.find((t) => t.id === threadId);
     if (!thread) throw new Error(`Thread not found: ${threadId}`);
 
-    thread.turns.push({
+    const item = {
       id: rid("turn"),
       createdAt: nowIso(),
       ...turn,
-    });
-    thread.updatedAt = nowIso();
-    await this.save(db);
-    return thread.turns.at(-1);
-  }
+    };
 
-  async listThreads() {
-    const db = await this.load();
-    return db.threads;
+    thread.turns.push(item);
+    thread.updatedAt = nowIso();
+
+    await this.save(db);
+    return item;
   }
 }

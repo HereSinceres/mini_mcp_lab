@@ -5,7 +5,6 @@ function safeEval(expr) {
   if (!/^[\d\s+\-*/().]+$/.test(expr)) {
     throw new Error("Only numbers and + - * / ( ) are allowed");
   }
-
   return Function(`"use strict"; return (${expr})`)();
 }
 
@@ -24,7 +23,7 @@ peer.register(METHODS.INITIALIZE, async (params) => {
   return {
     serverInfo: {
       name: "math-server",
-      version: "2.0.0",
+      version: "3.0.0",
     },
     capabilities: {
       tools: true,
@@ -52,6 +51,7 @@ peer.register(METHODS.TOOLS_LIST, async () => {
 
 peer.register(METHODS.TOOLS_CALL, async (params) => {
   const { name, arguments: args = {} } = params || {};
+
   peer.notify(NOTIFICATIONS.TOOL_STARTED, { name, args });
 
   if (name !== "calc") {
@@ -59,6 +59,7 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
   }
 
   const value = safeEval(args.expression);
+
   peer.notify(NOTIFICATIONS.TOOL_FINISHED, { name });
 
   return {

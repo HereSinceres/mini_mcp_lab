@@ -30,7 +30,10 @@ export class McpClient {
     });
 
     const init = await this.peer.request(METHODS.INITIALIZE, {
-      clientInfo: { name: "mini-codex-host-v2", version: "2.0.0" },
+      clientInfo: {
+        name: "mini-codex-host-v3",
+        version: "3.0.0",
+      },
     });
 
     const list = await this.peer.request(METHODS.TOOLS_LIST, {});
@@ -38,8 +41,8 @@ export class McpClient {
     return { init, tools: this.tools };
   }
 
-  hasTool(toolName) {
-    return this.tools.some((t) => t.name === toolName);
+  hasTool(name) {
+    return this.tools.some((t) => t.name === name);
   }
 
   async callTool(name, args = {}) {

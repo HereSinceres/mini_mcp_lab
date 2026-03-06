@@ -1,1 +1,1 @@
-hello mcp2
+React Fiber uses lanes\nchildLanes bubble in completeWork

@@ -269,6 +269,605 @@
           "assistant": "计算结果：1-+2 = -1"
         }
       ]
+    },
+    {
+      "id": "thread_1772792268470_e3s7nq",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:17:48.470Z",
+      "updatedAt": "2026-03-06T10:19:21.027Z",
+      "turns": [
+        {
+          "id": "turn_1772792273564_jfqjks",
+          "createdAt": "2026-03-06T10:17:53.564Z",
+          "user": "ls",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "list_dir",
+                "args": {
+                  "dir": "."
+                },
+                "reason": "User wants to inspect workspace files"
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "list_dir",
+                "args": {
+                  "dir": "."
+                },
+                "result": {
+                  "content": [
+                    {
+                      "name": "notes",
+                      "type": "dir"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "目录内容如下：\n[\n  {\n    \"name\": \"notes\",\n    \"type\": \"dir\"\n  }\n]"
+              }
+            }
+          ],
+          "assistant": "目录内容如下：\n[\n  {\n    \"name\": \"notes\",\n    \"type\": \"dir\"\n  }\n]"
+        },
+        {
+          "id": "turn_1772792281237_xmplqc",
+          "createdAt": "2026-03-06T10:18:01.237Z",
+          "user": "write notes/today.txt | React Fiber uses lanes",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "write_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "React Fiber uses lanes"
+                },
+                "reason": "User wants to write a file"
+              }
+            },
+            {
+              "kind": "approval",
+              "value": {
+                "approved": true,
+                "toolName": "write_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "React Fiber uses lanes"
+                }
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "write_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "React Fiber uses lanes"
+                },
+                "result": {
+                  "content": {
+                    "ok": true,
+                    "path": "notes/today.txt",
+                    "bytes": 22
+                  }
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "写入成功：{\n  \"ok\": true,\n  \"path\": \"notes/today.txt\",\n  \"bytes\": 22\n}"
+              }
+            }
+          ],
+          "assistant": "写入成功：{\n  \"ok\": true,\n  \"path\": \"notes/today.txt\",\n  \"bytes\": 22\n}"
+        },
+        {
+          "id": "turn_1772792290653_b9kt33",
+          "createdAt": "2026-03-06T10:18:10.654Z",
+          "user": "append notes/today.txt | \\nchildLanes bubble in completeWork",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "append_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "\\nchildLanes bubble in completeWork"
+                },
+                "reason": "User wants to append a file"
+              }
+            },
+            {
+              "kind": "approval",
+              "value": {
+                "approved": false,
+                "toolName": "append_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "\\nchildLanes bubble in completeWork"
+                }
+              }
+            }
+          ],
+          "assistant": "已拒绝写操作。"
+        },
+        {
+          "id": "turn_1772792296545_6bfudd",
+          "createdAt": "2026-03-06T10:18:16.545Z",
+          "user": "append notes/today.txt | \\nchildLanes bubble in completeWork",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "append_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "\\nchildLanes bubble in completeWork"
+                },
+                "reason": "User wants to append a file"
+              }
+            },
+            {
+              "kind": "approval",
+              "value": {
+                "approved": false,
+                "toolName": "append_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "\\nchildLanes bubble in completeWork"
+                }
+              }
+            }
+          ],
+          "assistant": "已拒绝写操作。"
+        },
+        {
+          "id": "turn_1772792305572_b168zz",
+          "createdAt": "2026-03-06T10:18:25.572Z",
+          "user": "append notes/today.txt | \\nchildLanes bubble in completeWork",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "append_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "\\nchildLanes bubble in completeWork"
+                },
+                "reason": "User wants to append a file"
+              }
+            },
+            {
+              "kind": "approval",
+              "value": {
+                "approved": true,
+                "toolName": "append_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "append_file",
+                "args": {
+                  "path": "notes/today.txt",
+                  "content": "\\nchildLanes bubble in completeWork"
+                },
+                "result": {
+                  "content": {
+                    "ok": true,
+                    "path": "notes/today.txt",
+                    "appendedBytes": 35
+                  }
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "追加成功：{\n  \"ok\": true,\n  \"path\": \"notes/today.txt\",\n  \"appendedBytes\": 35\n}"
+              }
+            }
+          ],
+          "assistant": "追加成功：{\n  \"ok\": true,\n  \"path\": \"notes/today.txt\",\n  \"appendedBytes\": 35\n}"
+        },
+        {
+          "id": "turn_1772792310384_ti6xrz",
+          "createdAt": "2026-03-06T10:18:30.384Z",
+          "user": "read notes/today.txt",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "reason": "User wants to read a file"
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+              }
+            }
+          ],
+          "assistant": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+        },
+        {
+          "id": "turn_1772792322855_zgw7r1",
+          "createdAt": "2026-03-06T10:18:42.855Z",
+          "user": "summarize_file notes/today.txt",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "reason": "Need file content before summarizing"
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "1. 文件共有 1 行，开头内容主要是：React Fiber uses lanes\\nchildLanes bubble in completeWork\n2. 高频关键词可能包括：react、fiber、uses、lanes、nchildlanes\n3. 总结：这份文件主要围绕上述内容展开，可继续做结构化提炼或改写。"
+              }
+            }
+          ],
+          "assistant": "1. 文件共有 1 行，开头内容主要是：React Fiber uses lanes\\nchildLanes bubble in completeWork\n2. 高频关键词可能包括：react、fiber、uses、lanes、nchildlanes\n3. 总结：这份文件主要围绕上述内容展开，可继续做结构化提炼或改写。"
+        },
+        {
+          "id": "turn_1772792358864_8qqn2v",
+          "createdAt": "2026-03-06T10:19:18.864Z",
+          "user": "summarize_file notes/today.txt",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "reason": "Need file content before summarizing"
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "1. 文件共有 1 行，开头内容主要是：React Fiber uses lanes\\nchildLanes bubble in completeWork\n2. 高频关键词可能包括：react、fiber、uses、lanes、nchildlanes\n3. 总结：这份文件主要围绕上述内容展开，可继续做结构化提炼或改写。"
+              }
+            }
+          ],
+          "assistant": "1. 文件共有 1 行，开头内容主要是：React Fiber uses lanes\\nchildLanes bubble in completeWork\n2. 高频关键词可能包括：react、fiber、uses、lanes、nchildlanes\n3. 总结：这份文件主要围绕上述内容展开，可继续做结构化提炼或改写。"
+        },
+        {
+          "id": "turn_1772792361027_mrtlfo",
+          "createdAt": "2026-03-06T10:19:21.027Z",
+          "user": "summarize_file notes/today.txt",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "reason": "Need file content before summarizing"
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "1. 文件共有 1 行，开头内容主要是：React Fiber uses lanes\\nchildLanes bubble in completeWork\n2. 高频关键词可能包括：react、fiber、uses、lanes、nchildlanes\n3. 总结：这份文件主要围绕上述内容展开，可继续做结构化提炼或改写。"
+              }
+            }
+          ],
+          "assistant": "1. 文件共有 1 行，开头内容主要是：React Fiber uses lanes\\nchildLanes bubble in completeWork\n2. 高频关键词可能包括：react、fiber、uses、lanes、nchildlanes\n3. 总结：这份文件主要围绕上述内容展开，可继续做结构化提炼或改写。"
+        }
+      ]
+    },
+    {
+      "id": "thread_1772792508238_sjh1bp",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:21:48.238Z",
+      "updatedAt": "2026-03-06T10:21:48.239Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1772792518500_u5zh89",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:21:58.500Z",
+      "updatedAt": "2026-03-06T10:21:58.501Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1772792560613_oqcx4i",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:22:40.613Z",
+      "updatedAt": "2026-03-06T10:22:40.613Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1772792646772_s5tnyy",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:24:06.772Z",
+      "updatedAt": "2026-03-06T10:24:06.772Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1772793052798_okln56",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:30:52.798Z",
+      "updatedAt": "2026-03-06T10:30:52.799Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1772793242496_o06xj3",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:34:02.496Z",
+      "updatedAt": "2026-03-06T10:34:02.496Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1772793251369_zvk4ty",
+      "title": "Demo Thread v3",
+      "createdAt": "2026-03-06T10:34:11.369Z",
+      "updatedAt": "2026-03-06T10:49:21.473Z",
+      "turns": [
+        {
+          "id": "turn_1772793267622_secefb",
+          "createdAt": "2026-03-06T10:34:27.622Z",
+          "user": "tools",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "The available tools are as follows:\n\n### Filesystem (fs) tools:\n1. **list_dir**: List files under a workspace-relative directory, requires parameter `dir` (the directory path to list)\n2. **read_file**: Read a workspace-relative UTF-8 file, requires parameter `path` (path of the file to read)\n3. **write_file**: Overwrite a workspace-relative UTF-8 file, requires parameters `path` (target file path) and `content` (text to write)\n4. **append_file**: Append text to a workspace-relative UTF-8 file, requires parameters `path` (target file path) and `content` (text to append)\n\n### Math tools:\n5. **calc**: Evaluate a simple math expression, requires parameter `expression` (the math expression to calculate)"
+              }
+            }
+          ],
+          "assistant": "The available tools are as follows:\n\n### Filesystem (fs) tools:\n1. **list_dir**: List files under a workspace-relative directory, requires parameter `dir` (the directory path to list)\n2. **read_file**: Read a workspace-relative UTF-8 file, requires parameter `path` (path of the file to read)\n3. **write_file**: Overwrite a workspace-relative UTF-8 file, requires parameters `path` (target file path) and `content` (text to write)\n4. **append_file**: Append text to a workspace-relative UTF-8 file, requires parameters `path` (target file path) and `content` (text to append)\n\n### Math tools:\n5. **calc**: Evaluate a simple math expression, requires parameter `expression` (the math expression to calculate)"
+        },
+        {
+          "id": "turn_1772793307730_96jinm",
+          "createdAt": "2026-03-06T10:35:07.730Z",
+          "user": "calc 1+2",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "calc",
+                "args": {
+                  "expression": "1+2"
+                },
+                "reason": "The user needs to calculate the result of the math expression 1+2, so the calc tool is called to evaluate this expression."
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "math",
+                "toolName": "calc",
+                "args": {
+                  "expression": "1+2"
+                },
+                "result": {
+                  "content": {
+                    "expression": "1+2",
+                    "value": 3
+                  }
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "The result of the calculation expression 1+2 is 3."
+              }
+            }
+          ],
+          "assistant": "The result of the calculation expression 1+2 is 3."
+        },
+        {
+          "id": "turn_1772793627427_8b6cnk",
+          "createdAt": "2026-03-06T10:40:27.427Z",
+          "user": "summarize_file notes/today.txt",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "reason": "To summarize the content of notes/today.txt, we first need to read the file's content using the read_file tool as required by the rules."
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                },
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "The file notes/today.txt contains two short notes about React Fiber implementation:\n1. React Fiber uses the lanes model for priority management\n2. childLanes bubble up during the completeWork phase of Fiber processing"
+              }
+            }
+          ],
+          "assistant": "The file notes/today.txt contains two short notes about React Fiber implementation:\n1. React Fiber uses the lanes model for priority management\n2. childLanes bubble up during the completeWork phase of Fiber processing"
+        },
+        {
+          "id": "turn_1772794021119_xibn16",
+          "createdAt": "2026-03-06T10:47:01.119Z",
+          "user": "list_tools",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "### Available Tools\n#### Filesystem (server: fs)\n1. **list_dir**: List files under a workspace-relative directory\n   - Input parameter: `dir` (string, workspace-relative directory path)\n2. **read_file**: Read a workspace-relative UTF-8 file\n   - Input parameter: `path` (string, required, workspace-relative file path)\n3. **write_file**: Overwrite a workspace-relative UTF-8 file\n   - Input parameters: `path` (string, required, workspace-relative file path), `content` (string, required, text to write)\n4. **append_file**: Append text to a workspace-relative UTF-8 file\n   - Input parameters: `path` (string, required, workspace-relative file path), `content` (string, required, text to append)\n#### Math (server: math)\n1. **calc**: Evaluate a simple math expression\n   - Input parameter: `expression` (string, required, math expression to evaluate)"
+              }
+            }
+          ],
+          "assistant": "### Available Tools\n#### Filesystem (server: fs)\n1. **list_dir**: List files under a workspace-relative directory\n   - Input parameter: `dir` (string, workspace-relative directory path)\n2. **read_file**: Read a workspace-relative UTF-8 file\n   - Input parameter: `path` (string, required, workspace-relative file path)\n3. **write_file**: Overwrite a workspace-relative UTF-8 file\n   - Input parameters: `path` (string, required, workspace-relative file path), `content` (string, required, text to write)\n4. **append_file**: Append text to a workspace-relative UTF-8 file\n   - Input parameters: `path` (string, required, workspace-relative file path), `content` (string, required, text to append)\n#### Math (server: math)\n1. **calc**: Evaluate a simple math expression\n   - Input parameter: `expression` (string, required, math expression to evaluate)"
+        },
+        {
+          "id": "turn_1772794161473_wkcp3m",
+          "createdAt": "2026-03-06T10:49:21.473Z",
+          "user": "记录今日TODO, 看牙医",
+          "steps": [
+            {
+              "kind": "plan",
+              "value": {
+                "type": "tool",
+                "toolName": "append_file",
+                "args": {
+                  "path": "todo.txt",
+                  "content": "今日TODO：看牙医\n"
+                },
+                "reason": "用户需要记录今日待办事项「看牙医」，使用追加写入文件的方式记录不会覆盖文件中已有的其他待办内容，符合需求。"
+              }
+            },
+            {
+              "kind": "approval",
+              "value": {
+                "approved": true,
+                "toolName": "append_file",
+                "args": {
+                  "path": "todo.txt",
+                  "content": "今日TODO：看牙医\n"
+                }
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "append_file",
+                "args": {
+                  "path": "todo.txt",
+                  "content": "今日TODO：看牙医\n"
+                },
+                "result": {
+                  "content": {
+                    "ok": true,
+                    "path": "todo.txt",
+                    "appendedBytes": 23
+                  }
+                }
+              }
+            },
+            {
+              "kind": "plan",
+              "value": {
+                "type": "answer",
+                "text": "已成功将今日TODO「看牙医」记录到todo.txt文件中，记录操作完成。"
+              }
+            }
+          ],
+          "assistant": "已成功将今日TODO「看牙医」记录到todo.txt文件中，记录操作完成。"
+        }
+      ]
     }
   ]
 }

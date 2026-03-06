@@ -1,11 +1,21 @@
-import { pretty } from "../shared/utils.js";
+import { pretty, clipText } from "../shared/utils.js";
 import { planWithRules } from "./planner-rule.js";
+import { planWithLLM } from "./planner-llm.js";
+import { callModel } from "./model.js";
 
 export class AgentRuntime {
-  constructor({ clients, threadStore, askApproval }) {
+  constructor({
+    clients,
+    threadStore,
+    askApproval,
+    plannerMode = "llm",
+    maxSteps = 6,
+  }) {
     this.clients = clients;
     this.threadStore = threadStore;
     this.askApproval = askApproval;
+    this.plannerMode = plannerMode;
+    this.maxSteps = maxSteps;
   }
 
   getToolCatalog() {
@@ -17,6 +27,7 @@ export class AgentRuntime {
           serverLabel: client.label,
           name: tool.name,
           description: tool.description,
+          inputSchema: tool.inputSchema ?? null,
         });
       }
     }
@@ -27,60 +38,73 @@ export class AgentRuntime {
     return this.clients.find((c) => c.hasTool(toolName)) || null;
   }
 
-  async runTurn({ threadId, userInput }) {
-    const catalog = this.getToolCatalog();
-    const plan = planWithRules(userInput, catalog);
-
-    if (plan.type === "answer") {
-      const assistant = plan.text;
-      await this.threadStore.appendTurn(threadId, {
-        user: userInput,
-        plan,
-        assistant,
+  async planStep({ userInput, state }) {
+    if (this.plannerMode === "llm") {
+      return planWithLLM({
+        userInput,
+        state,
+        toolCatalog: this.getToolCatalog(),
+        callModel,
       });
-      return { plan, assistant };
     }
 
-    if (plan.type === "builtin") {
-      if (plan.action === "list_tools") {
-        const assistant = pretty(catalog);
-        await this.threadStore.appendTurn(threadId, {
-          user: userInput,
-          plan,
-          assistant,
-        });
-        return { plan, assistant };
+    return planWithRules({ userInput, state });
+  }
+
+  async runTurn({ threadId, userInput }) {
+    const steps = [];
+    let finalAnswer = "";
+    let state = {
+      step: 0,
+      originalUserInput: userInput,
+      lastToolName: null,
+      lastToolResult: null,
+    };
+
+    for (let i = 0; i < this.maxSteps; i += 1) {
+      const plan = await this.planStep({ userInput, state });
+      steps.push({ kind: "plan", value: plan });
+
+      if (plan.type === "answer") {
+        finalAnswer = plan.text;
+        break;
       }
 
-      if (plan.action === "list_threads") {
-        const threads = await this.threadStore.listThreads();
-        const assistant = pretty(
-          threads.map((t) => ({
-            id: t.id,
-            title: t.title,
-            turns: t.turns.length,
-            updatedAt: t.updatedAt,
-          })),
-        );
-        await this.threadStore.appendTurn(threadId, {
-          user: userInput,
-          plan,
-          assistant,
-        });
-        return { plan, assistant };
+      if (plan.type === "done") {
+        if (!finalAnswer) finalAnswer = "已完成。";
+        break;
       }
-    }
 
-    if (plan.type === "tool") {
+      if (plan.type === "builtin") {
+        if (plan.action === "list_tools") {
+          finalAnswer = pretty(this.getToolCatalog());
+          break;
+        }
+
+        if (plan.action === "list_threads") {
+          const threads = await this.threadStore.listThreads();
+          finalAnswer = pretty(
+            threads.map((t) => ({
+              id: t.id,
+              title: t.title,
+              turns: t.turns.length,
+              updatedAt: t.updatedAt,
+            })),
+          );
+          break;
+        }
+
+        throw new Error(`Unsupported builtin action: ${plan.action}`);
+      }
+
+      if (plan.type !== "tool") {
+        throw new Error(`Unsupported plan type: ${plan.type}`);
+      }
+
       const client = this.findClientForTool(plan.toolName);
       if (!client) {
-        const assistant = `No server provides tool: ${plan.toolName}`;
-        await this.threadStore.appendTurn(threadId, {
-          user: userInput,
-          plan,
-          assistant,
-        });
-        return { plan, assistant };
+        finalAnswer = `No server provides tool: ${plan.toolName}`;
+        break;
       }
 
       const isWriteTool = ["write_file", "append_file"].includes(plan.toolName);
@@ -88,56 +112,65 @@ export class AgentRuntime {
         const ok = await this.askApproval(
           `允许写操作？ tool=${plan.toolName} args=${pretty(plan.args)}`,
         );
+
+        steps.push({
+          kind: "approval",
+          value: {
+            approved: ok,
+            toolName: plan.toolName,
+            args: plan.args,
+          },
+        });
+
         if (!ok) {
-          const assistant = "已拒绝写操作。";
-          await this.threadStore.appendTurn(threadId, {
-            user: userInput,
-            plan,
-            assistant,
-            toolCall: {
-              server: client.label,
-              name: plan.toolName,
-              args: plan.args,
-              approved: false,
-            },
-          });
-          return { plan, assistant };
+          finalAnswer = "已拒绝写操作。";
+          break;
         }
       }
 
       const result = await client.callTool(plan.toolName, plan.args);
-
-      let assistant = "";
-      if (plan.toolName === "list_dir") {
-        assistant = `目录内容：\n${pretty(result.content)}`;
-      } else if (plan.toolName === "read_file") {
-        assistant = String(result.content);
-      } else if (plan.toolName === "write_file") {
-        assistant = `写入成功：${pretty(result.content)}`;
-      } else if (plan.toolName === "append_file") {
-        assistant = `追加成功：${pretty(result.content)}`;
-      } else if (plan.toolName === "calc") {
-        assistant = `计算结果：${result.content.expression} = ${result.content.value}`;
-      } else {
-        assistant = pretty(result);
-      }
-
-      await this.threadStore.appendTurn(threadId, {
-        user: userInput,
-        plan,
-        toolCall: {
+      steps.push({
+        kind: "toolResult",
+        value: {
           server: client.label,
-          name: plan.toolName,
+          toolName: plan.toolName,
           args: plan.args,
-          approved: true,
+          result: normalizeToolResult(result),
         },
-        toolResult: result,
-        assistant,
       });
 
-      return { plan, result, assistant };
+      state = {
+        step: state.step + 1,
+        originalUserInput: state.originalUserInput,
+        lastToolName: plan.toolName,
+        lastToolResult: normalizeToolResult(result),
+      };
     }
 
-    throw new Error(`Unsupported plan type: ${plan.type}`);
+    if (!finalAnswer) {
+      finalAnswer = "未在限定步骤内得到最终回答。";
+    }
+
+    await this.threadStore.appendTurn(threadId, {
+      user: userInput,
+      steps,
+      assistant: finalAnswer,
+    });
+
+    return {
+      steps,
+      assistant: finalAnswer,
+    };
   }
+}
+
+function normalizeToolResult(result) {
+  if (!result) return result;
+  if (typeof result.content === "string") {
+    return {
+      ...result,
+      content: clipText(result.content, 6000),
+    };
+  }
+  return result;
 }
