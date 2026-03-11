@@ -15,25 +15,20 @@ export class McpClient {
 
   async connect() {
     this.child = spawn(this.command, this.args, {
-      stdio: ["pipe", "pipe", "inherit"],
+      stdio: ["pipe", "pipe", "inherit"]
     });
 
     this.peer = new JsonRpcPeer({
       input: this.child.stdout,
       output: this.child.stdin,
       onNotification: (method, params) => {
-        console.log(
-          `[notify:${this.label}] ${method} ${JSON.stringify(params)}`,
-        );
+        console.log(`[notify:${this.label}] ${method} ${JSON.stringify(params)}`);
       },
-      onError: (...args) => console.error(...args),
+      onError: (...args) => console.error(...args)
     });
 
     await this.peer.request(METHODS.INITIALIZE, {
-      clientInfo: {
-        name: "mini-codex-host-v4",
-        version: "4.0.0",
-      },
+      clientInfo: { name: "mini-codex-host-v5", version: "5.0.0" }
     });
 
     const list = await this.peer.request(METHODS.TOOLS_LIST, {});
@@ -48,7 +43,7 @@ export class McpClient {
   async callTool(name, args = {}) {
     return this.peer.request(METHODS.TOOLS_CALL, {
       name,
-      arguments: args,
+      arguments: args
     });
   }
 

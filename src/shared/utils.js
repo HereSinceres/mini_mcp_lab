@@ -34,7 +34,7 @@ export async function writeJsonFile(file, data) {
 export function clipText(text, max = 6000) {
   const s = String(text ?? "");
   if (s.length <= max) return s;
-  return s.slice(0, max) + "\n...[truncated]";
+  return `${s.slice(0, max)}\n...[truncated]`;
 }
 
 export function safeJsonParse(text, fallback = null) {
@@ -43,4 +43,10 @@ export function safeJsonParse(text, fallback = null) {
   } catch {
     return fallback;
   }
+}
+
+export function stripMarkdownFence(text) {
+  const s = String(text || "").trim();
+  if (!s.startsWith("```")) return s;
+  return s.replace(/^```[a-zA-Z0-9_-]*\n?/, "").replace(/```$/, "").trim();
 }

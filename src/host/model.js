@@ -3,26 +3,24 @@ export async function callModel({ systemPrompt, userPrompt }) {
   const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
   const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 
-  if (!apiKey) {
-    throw new Error(
-      "OPENAI_API_KEY is not set. 当前先用 rule planner；若要接真实模型，请在 .env 或环境变量里配置。",
-    );
-  }
-
-  const res = await fetch(`${baseUrl}/chat/completions`, {
+  const res = await fetch(`${baseUrl}/responses`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       model,
-      temperature: 0,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+      input: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: userPrompt,
+        },
       ],
-      // response_format: { type: "json_schema" },
     }),
   });
 
@@ -32,11 +30,6 @@ export async function callModel({ systemPrompt, userPrompt }) {
   }
 
   const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content;
 
-  if (!content) {
-    throw new Error("Empty model response");
-  }
-
-  return content;
+  return data.output_text;
 }

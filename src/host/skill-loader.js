@@ -19,7 +19,7 @@ export function loadSkills() {
 
     return {
       ...config,
-      prompt,
+      prompt
     };
   });
 }

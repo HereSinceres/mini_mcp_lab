@@ -11,43 +11,34 @@ function safeEval(expr) {
 const peer = new JsonRpcPeer({
   input: process.stdin,
   output: process.stdout,
-  onError: (...args) => console.error(...args),
+  onError: (...args) => console.error(...args)
 });
 
 peer.register(METHODS.INITIALIZE, async (params) => {
   peer.notify(NOTIFICATIONS.LOG, {
     level: "info",
-    message: `math-server initialized by ${params?.clientInfo?.name || "unknown"}`,
+    message: `math-server initialized by ${params?.clientInfo?.name || "unknown"}`
   });
 
   return {
-    serverInfo: {
-      name: "math-server",
-      version: "4.0.0",
-    },
-    capabilities: {
-      tools: true,
-    },
+    serverInfo: { name: "math-server", version: "5.0.0" },
+    capabilities: { tools: true }
   };
 });
 
-peer.register(METHODS.TOOLS_LIST, async () => {
-  return {
-    tools: [
-      {
-        name: "calc",
-        description: "Evaluate a simple math expression",
-        inputSchema: {
-          type: "object",
-          properties: {
-            expression: { type: "string" },
-          },
-          required: ["expression"],
-        },
-      },
-    ],
-  };
-});
+peer.register(METHODS.TOOLS_LIST, async () => ({
+  tools: [
+    {
+      name: "calc",
+      description: "Evaluate a simple math expression",
+      inputSchema: {
+        type: "object",
+        properties: { expression: { type: "string" } },
+        required: ["expression"]
+      }
+    }
+  ]
+}));
 
 peer.register(METHODS.TOOLS_CALL, async (params) => {
   const { name, arguments: args = {} } = params || {};
@@ -58,13 +49,12 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
   }
 
   const value = safeEval(args.expression);
-
   peer.notify(NOTIFICATIONS.TOOL_FINISHED, { name });
 
   return {
     content: {
       expression: args.expression,
-      value,
-    },
+      value
+    }
   };
 });

@@ -1,10 +1,19 @@
-import { clipText, pretty } from "../shared/utils.js";
+import { clipText, pretty, safeJsonParse } from "../shared/utils.js";
 
 export class AgentRuntime {
-  constructor({ clients, threadStore, skills, askApproval }) {
+  constructor({
+    clients,
+    threadStore,
+    skills,
+    responsesClient,
+    plannerTools,
+    askApproval,
+  }) {
     this.clients = clients;
     this.threadStore = threadStore;
     this.skills = skills;
+    this.responsesClient = responsesClient;
+    this.plannerTools = plannerTools;
     this.askApproval = askApproval;
   }
 
@@ -26,140 +35,164 @@ export class AgentRuntime {
     return this.clients.find((c) => c.hasTool(toolName)) || null;
   }
 
-  async run({ threadId, plan, userInput }) {
-    let assistant = "";
-    const steps = [];
-
-    if (plan.type === "builtin") {
-      if (plan.action === "list_tools") {
-        assistant = pretty(this.getToolCatalog());
-      } else if (plan.action === "list_skills") {
-        assistant = pretty(
-          this.skills.map((s) => ({
-            name: s.name,
-            trigger: s.trigger,
-            description: s.description,
-            tools: s.tools,
-          })),
-        );
-      } else if (plan.action === "list_threads") {
-        const threads = await this.threadStore.listThreads();
-        assistant = pretty(
-          threads.map((t) => ({
-            id: t.id,
-            title: t.title,
-            turns: t.turns.length,
-            updatedAt: t.updatedAt,
-          })),
-        );
-      } else {
-        throw new Error(`Unsupported builtin action: ${plan.action}`);
-      }
-
-      await this.threadStore.appendTurn(threadId, {
-        user: userInput,
-        plan,
-        steps,
-        assistant,
-      });
-
-      return { steps, assistant };
-    }
-
-    if (plan.type === "tool") {
-      const result = await this.#runTool(plan.toolName, plan.args, steps);
-      assistant = this.#formatToolAnswer(plan.toolName, result);
-
-      await this.threadStore.appendTurn(threadId, {
-        user: userInput,
-        plan,
-        steps,
-        assistant,
-      });
-
-      return { steps, assistant };
-    }
-
-    if (plan.type === "skill") {
-      const skill = this.skills.find((s) => s.name === plan.skillName);
-      if (!skill) {
-        assistant = `Skill not found: ${plan.skillName}`;
-      } else {
-        assistant = await this.#runSkill(skill, plan.args, steps);
-      }
-
-      await this.threadStore.appendTurn(threadId, {
-        user: userInput,
-        plan,
-        steps,
-        assistant,
-      });
-
-      return { steps, assistant };
-    }
-
-    if (plan.type === "answer") {
-      assistant = plan.text;
-
-      await this.threadStore.appendTurn(threadId, {
-        user: userInput,
-        plan,
-        steps,
-        assistant,
-      });
-
-      return { steps, assistant };
-    }
-
-    throw new Error(`Unsupported plan type: ${plan.type}`);
+  buildSystemPrompt() {
+    return [
+      "You are the planner for a local coding agent.",
+      "Prefer using tools or skills when they clearly help.",
+      "Use run_skill for higher-level workflows.",
+      "Use builtins when the user asks about tools, skills, or threads.",
+      "Do not invent files or tool results.",
+      `Available skills: ${this.skills.map((s) => s.name).join(", ")}`,
+      `Available low-level tools: ${this.getToolCatalog()
+        .map((t) => t.name)
+        .join(", ")}`,
+    ].join("\n");
   }
 
-  async #runSkill(skill, args, steps) {
+  async runTurn({ threadId, userInput }) {
+    const steps = [];
+
+    const initial = await this.responsesClient.createPlannerResponse({
+      systemPrompt: this.buildSystemPrompt(),
+      userInput,
+      tools: this.plannerTools,
+    });
+
     steps.push({
-      kind: "skill",
-      value: {
-        name: skill.name,
-        trigger: skill.trigger,
-        args,
-      },
+      kind: "modelResponse",
+      value: summarizeModelResponse(initial),
+    });
+
+    const toolCalls = this.responsesClient.extractToolCalls(initial);
+
+    if (toolCalls.length === 0) {
+      const assistant =
+        this.responsesClient.extractOutputText(initial) || "没有可执行动作。";
+      await this.threadStore.appendTurn(threadId, {
+        user: userInput,
+        steps,
+        assistant,
+      });
+      return { steps, assistant };
+    }
+
+    const toolOutputs = [];
+
+    for (const call of toolCalls) {
+      steps.push({ kind: "functionCall", value: call });
+      const output = await this.executeFunctionCall(call, steps);
+      toolOutputs.push({ call_id: call.id, output });
+    }
+
+    const followup = await this.responsesClient.continueAfterToolCalls({
+      previousResponseId: initial.id,
+      toolOutputs,
+    });
+
+    steps.push({
+      kind: "followupResponse",
+      value: summarizeModelResponse(followup),
+    });
+
+    const assistant =
+      this.responsesClient.extractOutputText(followup) ||
+      "已执行，但未得到最终文本。";
+    await this.threadStore.appendTurn(threadId, {
+      user: userInput,
+      steps,
+      assistant,
+    });
+
+    return { steps, assistant };
+  }
+
+  async executeFunctionCall(call, steps) {
+    const name = call.name;
+    const args = call.arguments || {};
+
+    if (name === "list_tools_builtin") {
+      return this.getToolCatalog();
+    }
+
+    if (name === "list_skills_builtin") {
+      return this.skills.map((s) => ({
+        name: s.name,
+        trigger: s.trigger,
+        description: s.description,
+        tools: s.tools,
+      }));
+    }
+
+    if (name === "list_threads_builtin") {
+      const threads = await this.threadStore.listThreads();
+      return threads.map((t) => ({
+        id: t.id,
+        title: t.title,
+        turns: t.turns.length,
+        updatedAt: t.updatedAt,
+      }));
+    }
+
+    if (name === "run_skill") {
+      return this.runSkill(args.skillName, args.input, steps);
+    }
+
+    return this.runLowLevelTool(name, args, steps);
+  }
+
+  async runSkill(skillName, rawInput, steps) {
+    const skill = this.skills.find((s) => s.name === skillName);
+    if (!skill) {
+      throw new Error(`Skill not found: ${skillName}`);
+    }
+
+    steps.push({
+      kind: "skillStart",
+      value: { name: skill.name, input: rawInput },
     });
 
     if (skill.name === "summarize_file") {
-      const readResult = await this.#runTool(
-        "read_file",
-        { path: args.path },
-        steps,
-      );
-      return summarizeText(String(readResult.content || ""));
+      const path = String(rawInput || "").trim();
+      const read = await this.runLowLevelTool("read_file", { path }, steps);
+      const summary = summarizeText(String(read.content || ""));
+      steps.push({
+        kind: "skillEnd",
+        value: { name: skill.name, output: summary },
+      });
+      return summary;
     }
 
     if (skill.name === "append_note") {
-      await this.#runTool(
+      const [path, ...rest] = String(rawInput || "").split("|");
+      const filePath = (path || "").trim();
+      const content = rest.join("|").trim();
+      await this.runLowLevelTool(
         "append_file",
-        { path: args.path, content: args.content },
+        { path: filePath, content },
         steps,
       );
-      const readResult = await this.#runTool(
+      const read = await this.runLowLevelTool(
         "read_file",
-        { path: args.path },
+        { path: filePath },
         steps,
       );
-      return `追加完成，当前文件内容：\n${clipText(readResult.content, 3000)}`;
+      const output = `追加完成，当前文件内容：\n${clipText(read.content, 3000)}`;
+      steps.push({ kind: "skillEnd", value: { name: skill.name, output } });
+      return output;
     }
 
     if (skill.name === "calculate") {
-      const result = await this.#runTool(
-        "calc",
-        { expression: args.expression },
-        steps,
-      );
-      return `计算结果：${result.content.expression} = ${result.content.value}`;
+      const expression = String(rawInput || "").trim();
+      const result = await this.runLowLevelTool("calc", { expression }, steps);
+      const output = `计算结果：${result.content.expression} = ${result.content.value}`;
+      steps.push({ kind: "skillEnd", value: { name: skill.name, output } });
+      return output;
     }
 
-    return `Skill ${skill.name} 暂未实现执行逻辑。`;
+    throw new Error(`Skill logic not implemented: ${skill.name}`);
   }
 
-  async #runTool(toolName, args, steps) {
+  async runLowLevelTool(toolName, args, steps) {
     const client = this.findClientForTool(toolName);
     if (!client) {
       throw new Error(`No MCP server provides tool: ${toolName}`);
@@ -170,12 +203,7 @@ export class AgentRuntime {
       const approved = await this.askApproval(
         `允许写操作？ tool=${toolName} args=${pretty(args)}`,
       );
-
-      steps.push({
-        kind: "approval",
-        value: { approved, toolName, args },
-      });
-
+      steps.push({ kind: "approval", value: { approved, toolName, args } });
       if (!approved) {
         throw new Error("Write operation rejected by user");
       }
@@ -183,61 +211,35 @@ export class AgentRuntime {
 
     steps.push({
       kind: "toolCall",
-      value: {
-        server: client.label,
-        toolName,
-        args,
-      },
+      value: { server: client.label, toolName, args },
     });
 
     const result = await client.callTool(toolName, args);
-
     const normalized = normalizeToolResult(result);
 
     steps.push({
       kind: "toolResult",
-      value: {
-        server: client.label,
-        toolName,
-        result: normalized,
-      },
+      value: { server: client.label, toolName, result: normalized },
     });
 
     return normalized;
   }
+}
 
-  #formatToolAnswer(toolName, result) {
-    if (toolName === "list_dir") {
-      return `目录内容：\n${pretty(result.content)}`;
-    }
-
-    if (toolName === "read_file") {
-      return clipText(result.content, 4000);
-    }
-
-    if (toolName === "write_file") {
-      return `写入成功：\n${pretty(result.content)}`;
-    }
-
-    if (toolName === "append_file") {
-      return `追加成功：\n${pretty(result.content)}`;
-    }
-
-    if (toolName === "calc") {
-      return `计算结果：${result.content.expression} = ${result.content.value}`;
-    }
-
-    return pretty(result);
-  }
+function summarizeModelResponse(resp) {
+  return {
+    id: resp?.id || null,
+    output_text: resp?.output_text || "",
+    output_types: Array.isArray(resp?.output)
+      ? resp.output.map((x) => x.type)
+      : [],
+  };
 }
 
 function normalizeToolResult(result) {
   if (!result) return result;
   if (typeof result.content === "string") {
-    return {
-      ...result,
-      content: clipText(result.content, 8000),
-    };
+    return { ...result, content: clipText(result.content, 8000) };
   }
   return result;
 }

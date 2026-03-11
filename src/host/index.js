@@ -5,7 +5,8 @@ import { stdin as input, stdout as output } from "node:process";
 import { McpClient } from "./mcp-client.js";
 import { ThreadStore } from "./thread-store.js";
 import { loadSkills } from "./skill-loader.js";
-import { planInput } from "./planner.js";
+import { buildPlannerTools } from "./planner-tools.js";
+import { ResponsesClient } from "./responses-client.js";
 import { AgentRuntime } from "./agent.js";
 
 loadEnvFile();
@@ -14,6 +15,7 @@ async function main() {
   const rl = readline.createInterface({ input, output });
   const threadStore = new ThreadStore();
   const skills = loadSkills();
+  console.log("Loaded skills:", skills.map((s) => s.name).join(", "));
 
   const clients = [
     new McpClient({
@@ -39,20 +41,31 @@ async function main() {
     console.log("");
   }
 
-  const thread = await threadStore.createThread("Demo Thread v4");
+  const thread = await threadStore.createThread("Demo Thread v5");
+  const responsesClient = new ResponsesClient({
+    apiKey: process.env.OPENAI_API_KEY || "",
+    baseUrl: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+    model: process.env.OPENAI_MODEL || "gpt-5.4-mini",
+    useRealModel: /^true$/i.test(process.env.USE_REAL_MODEL || "false"),
+  });
+
+  const plannerTools = buildPlannerTools(skills);
 
   const agent = new AgentRuntime({
     clients,
     threadStore,
     skills,
+    responsesClient,
+    plannerTools,
     askApproval: async (question) => {
       const ans = await rl.question(`${question} (y/n): `);
       return /^y(es)?$/i.test(ans.trim());
     },
   });
 
-  console.log("Mini Codex MCP Lab v4");
+  console.log("Mini Codex MCP Lab v5");
   console.log(`threadId = ${thread.id}`);
+  console.log(`USE_REAL_MODEL = ${process.env.USE_REAL_MODEL || "false"}`);
   console.log("");
   console.log("Try:");
   console.log("  tools");
@@ -67,6 +80,7 @@ async function main() {
   console.log("  summarize_file notes/today.txt");
   console.log("  append_note notes/today.txt | \\nthird line");
   console.log("  calculate (3 + 5) * 9");
+  console.log("  calc (9 + 1) * 3");
   console.log("  exit");
   console.log("");
 
@@ -75,10 +89,8 @@ async function main() {
     if (userInput.trim() === "exit") break;
 
     try {
-      const plan = planInput({ userInput, skills });
-      const result = await agent.run({
+      const result = await agent.runTurn({
         threadId: thread.id,
-        plan,
         userInput,
       });
 
@@ -99,7 +111,6 @@ async function main() {
   for (const client of clients) {
     await client.close();
   }
-
   rl.close();
 }
 

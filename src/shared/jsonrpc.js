@@ -1,12 +1,7 @@
 import readline from "node:readline";
 
 export class JsonRpcPeer {
-  constructor({
-    input,
-    output,
-    onNotification = () => {},
-    onError = console.error,
-  }) {
+  constructor({ input, output, onNotification = () => {}, onError = console.error }) {
     this.input = input;
     this.output = output;
     this.onNotification = onNotification;
@@ -37,14 +32,12 @@ export class JsonRpcPeer {
 
   request(method, params = {}) {
     const id = this.nextId++;
-    this.output.write(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        id,
-        method,
-        params,
-      }) + "\n",
-    );
+    this.output.write(JSON.stringify({
+      jsonrpc: "2.0",
+      id,
+      method,
+      params
+    }) + "\n");
 
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
@@ -52,24 +45,18 @@ export class JsonRpcPeer {
   }
 
   notify(method, params = {}) {
-    this.output.write(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        method,
-        params,
-      }) + "\n",
-    );
+    this.output.write(JSON.stringify({
+      jsonrpc: "2.0",
+      method,
+      params
+    }) + "\n");
   }
 
   async #handle(msg) {
     if (msg.method && Object.prototype.hasOwnProperty.call(msg, "id")) {
       const handler = this.handlers.get(msg.method);
       if (!handler) {
-        return this.#sendError(
-          msg.id,
-          -32601,
-          `Method not found: ${msg.method}`,
-        );
+        return this.#sendError(msg.id, -32601, `Method not found: ${msg.method}`);
       }
 
       try {
@@ -100,22 +87,14 @@ export class JsonRpcPeer {
   }
 
   #sendResult(id, result) {
-    this.output.write(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        id,
-        result,
-      }) + "\n",
-    );
+    this.output.write(JSON.stringify({ jsonrpc: "2.0", id, result }) + "\n");
   }
 
   #sendError(id, code, message) {
-    this.output.write(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        id,
-        error: { code, message },
-      }) + "\n",
-    );
+    this.output.write(JSON.stringify({
+      jsonrpc: "2.0",
+      id,
+      error: { code, message }
+    }) + "\n");
   }
 }

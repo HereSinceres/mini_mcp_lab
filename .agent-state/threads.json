@@ -887,6 +887,344 @@
           "assistant": "[\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"list_dir\",\n    \"description\": \"List files under a workspace-relative directory\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"read_file\",\n    \"description\": \"Read a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"write_file\",\n    \"description\": \"Overwrite a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"append_file\",\n    \"description\": \"Append text to a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"math\",\n    \"name\": \"calc\",\n    \"description\": \"Evaluate a simple math expression\"\n  }\n]"
         }
       ]
+    },
+    {
+      "id": "thread_1772804687030_wagpsd",
+      "title": "Demo Thread v5",
+      "createdAt": "2026-03-06T13:44:47.030Z",
+      "updatedAt": "2026-03-06T13:45:32.242Z",
+      "turns": [
+        {
+          "id": "turn_1772804732242_fygu61",
+          "createdAt": "2026-03-06T13:45:32.242Z",
+          "user": "read notes/today.txt",
+          "steps": [
+            {
+              "kind": "modelResponse",
+              "value": {
+                "id": "resp_0217728047407394d725e50adb936741e457920f0acab3c834dc0",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "function_call"
+                ]
+              }
+            },
+            {
+              "kind": "functionCall",
+              "value": {
+                "id": "call_7r2zsgpku0yxnejg662qwo36",
+                "name": "read_file",
+                "arguments": {
+                  "path": "notes/today.txt"
+                }
+              }
+            },
+            {
+              "kind": "toolCall",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                }
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "followupResponse",
+              "value": {
+                "id": "resp_0217728047456474d725e50adb936741e457920f0acab3c337b0c",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "message"
+                ]
+              }
+            }
+          ],
+          "assistant": "以下是`notes/today.txt`的内容：\n```\nReact Fiber uses lanes\nchildLanes bubble in completeWork\n```"
+        }
+      ]
+    },
+    {
+      "id": "thread_1772804799017_uk7eow",
+      "title": "Demo Thread v5",
+      "createdAt": "2026-03-06T13:46:39.017Z",
+      "updatedAt": "2026-03-06T13:46:51.254Z",
+      "turns": [
+        {
+          "id": "turn_1772804811254_np5yal",
+          "createdAt": "2026-03-06T13:46:51.254Z",
+          "user": "calc (9 + 1) * 3",
+          "steps": [
+            {
+              "kind": "modelResponse",
+              "value": {
+                "id": "resp_021772804819392f7e88ef2eb4438e2f7a5c62653ec70cf3ddfb5",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "function_call"
+                ]
+              }
+            },
+            {
+              "kind": "functionCall",
+              "value": {
+                "id": "call_0x931hvcu1odcck6bv8q2mxa",
+                "name": "calc",
+                "arguments": {
+                  "expression": "(9 + 1) * 3"
+                }
+              }
+            },
+            {
+              "kind": "toolCall",
+              "value": {
+                "server": "math",
+                "toolName": "calc",
+                "args": {
+                  "expression": "(9 + 1) * 3"
+                }
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "math",
+                "toolName": "calc",
+                "result": {
+                  "content": {
+                    "expression": "(9 + 1) * 3",
+                    "value": 30
+                  }
+                }
+              }
+            },
+            {
+              "kind": "followupResponse",
+              "value": {
+                "id": "resp_021772804825096f7e88ef2eb4438e2f7a5c62653ec70cf14e893",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "message"
+                ]
+              }
+            }
+          ],
+          "assistant": "The result of calculating `(9 + 1) * 3` is 30."
+        }
+      ]
+    },
+    {
+      "id": "thread_1772804891991_ixc0vn",
+      "title": "Demo Thread v5",
+      "createdAt": "2026-03-06T13:48:11.991Z",
+      "updatedAt": "2026-03-06T13:48:11.991Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1772804925474_ykiaok",
+      "title": "Demo Thread v5",
+      "createdAt": "2026-03-06T13:48:45.474Z",
+      "updatedAt": "2026-03-06T13:50:23.345Z",
+      "turns": [
+        {
+          "id": "turn_1772804946054_knyany",
+          "createdAt": "2026-03-06T13:49:06.054Z",
+          "user": "read notes/today.txt",
+          "steps": [
+            {
+              "kind": "modelResponse",
+              "value": {
+                "id": "resp_021772804955165868b2df7cad200b62b2bc44e6de10221490578",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "function_call"
+                ]
+              }
+            },
+            {
+              "kind": "functionCall",
+              "value": {
+                "id": "call_v9o6n0x6hgiojkj46y4hvtvy",
+                "name": "read_file",
+                "arguments": {
+                  "path": "notes/today.txt"
+                }
+              }
+            },
+            {
+              "kind": "toolCall",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                }
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "followupResponse",
+              "value": {
+                "id": "resp_021772804958957868b2df7cad200b62b2bc44e6de1022170be94",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "message"
+                ]
+              }
+            }
+          ],
+          "assistant": "The content of `notes/today.txt` is:\n```\nReact Fiber uses lanes\nchildLanes bubble in completeWork\n```"
+        },
+        {
+          "id": "turn_1772805023345_2ivdq0",
+          "createdAt": "2026-03-06T13:50:23.345Z",
+          "user": "summarize_file notes/today.txt",
+          "steps": [
+            {
+              "kind": "modelResponse",
+              "value": {
+                "id": "resp_021772805026298ec3db73c4849487ff7f18447ab3797c283baac",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "function_call"
+                ]
+              }
+            },
+            {
+              "kind": "functionCall",
+              "value": {
+                "id": "call_4k65nvjdlkhabttki3f3c2pn",
+                "name": "run_skill",
+                "arguments": {
+                  "skillName": "summarize_file",
+                  "input": "notes/today.txt"
+                }
+              }
+            },
+            {
+              "kind": "skillStart",
+              "value": {
+                "name": "summarize_file",
+                "input": "notes/today.txt"
+              }
+            },
+            {
+              "kind": "toolCall",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "args": {
+                  "path": "notes/today.txt"
+                }
+              }
+            },
+            {
+              "kind": "toolResult",
+              "value": {
+                "server": "filesystem",
+                "toolName": "read_file",
+                "result": {
+                  "content": "React Fiber uses lanes\\nchildLanes bubble in completeWork"
+                }
+              }
+            },
+            {
+              "kind": "skillEnd",
+              "value": {
+                "name": "summarize_file",
+                "output": "1. 文件共有 1 行，开头内容：React Fiber uses lanes\\nchildLanes bubble in completeWork\n2. 关键词：react、fiber、uses、lanes、nchildlanes\n3. 总结：这份文件适合继续做提纲、改写或结构化抽取。"
+              }
+            },
+            {
+              "kind": "followupResponse",
+              "value": {
+                "id": "resp_021772805031240ec3db73c4849487ff7f18447ab3797c2b11506",
+                "output_text": "",
+                "output_types": [
+                  "reasoning",
+                  "message"
+                ]
+              }
+            }
+          ],
+          "assistant": "### Summary of `notes/today.txt`\n1. Basic file info: The file only has 1 line, the full content is:\n   ```\n   React Fiber uses lanes\n   childLanes bubble in completeWork\n   ```\n2. Core keywords: React, Fiber, lanes, childLanes\n3. Summary description: This is a short technical note that records key points of the React Fiber lane scheduling mechanism, suitable for subsequent structured sorting, expansion and supplement of relevant technical content."
+        }
+      ]
+    },
+    {
+      "id": "thread_1773214045037_yjzn4k",
+      "title": "Demo Thread v5",
+      "createdAt": "2026-03-11T07:27:25.037Z",
+      "updatedAt": "2026-03-11T07:27:25.038Z",
+      "turns": []
+    },
+    {
+      "id": "thread_1773214089192_f2xdb5",
+      "title": "Demo Thread v5",
+      "createdAt": "2026-03-11T07:28:09.192Z",
+      "updatedAt": "2026-03-11T07:28:14.483Z",
+      "turns": [
+        {
+          "id": "turn_1773214094483_zhuqwn",
+          "createdAt": "2026-03-11T07:28:14.483Z",
+          "user": "tools",
+          "steps": [
+            {
+              "kind": "modelResponse",
+              "value": {
+                "id": "mock_resp_1",
+                "output_text": "",
+                "output_types": [
+                  "function_call"
+                ]
+              }
+            },
+            {
+              "kind": "functionCall",
+              "value": {
+                "id": "fc_1",
+                "name": "list_tools_builtin",
+                "arguments": {}
+              }
+            },
+            {
+              "kind": "followupResponse",
+              "value": {
+                "id": "mock_followup",
+                "output_text": "[\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"list_dir\",\n    \"description\": \"List files under a workspace-relative directory\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"read_file\",\n    \"description\": \"Read a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"write_file\",\n    \"description\": \"Overwrite a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"append_file\",\n    \"description\": \"Append text to a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"math\",\n    \"name\": \"calc\",\n    \"description\": \"Evaluate a simple math expression\"\n  }\n]",
+                "output_types": []
+              }
+            }
+          ],
+          "assistant": "[\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"list_dir\",\n    \"description\": \"List files under a workspace-relative directory\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"read_file\",\n    \"description\": \"Read a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"write_file\",\n    \"description\": \"Overwrite a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"filesystem\",\n    \"name\": \"append_file\",\n    \"description\": \"Append text to a workspace-relative UTF-8 file\"\n  },\n  {\n    \"server\": \"math\",\n    \"name\": \"calc\",\n    \"description\": \"Evaluate a simple math expression\"\n  }\n]"
+        }
+      ]
     }
   ]
 }
