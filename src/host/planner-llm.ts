@@ -3,7 +3,12 @@ export async function planWithLLM({
   state,
   toolCatalog,
   callModel,
-}) {
+}: {
+  userInput: string;
+  state: any;
+  toolCatalog: any[];
+  callModel: (prompt: string) => Promise<string>;
+}): Promise<any> {
   const systemPrompt = [
     "You are the planner for a local coding agent.",
     "You may decide one of three outputs:",
@@ -29,7 +34,7 @@ export async function planWithLLM({
     2,
   );
 
-  const raw = await callModel({ systemPrompt, userPrompt });
+  const raw = await callModel(`${systemPrompt}\n\n${userPrompt}`);
   const parsed = JSON.parse(raw);
 
   if (!parsed || !parsed.type) {

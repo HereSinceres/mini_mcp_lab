@@ -4,8 +4,15 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "host": "node src/host/index.js",
-    "fs-server": "node src/servers/fs-server.js",
-    "math-server": "node src/servers/math-server.js"
+    "build": "tsc",
+    "host": "node --loader ts-node/esm --experimental-specifier-resolution=node src/host/index.ts",
+    "fs-server": "node --loader ts-node/esm --experimental-specifier-resolution=node src/servers/fs-server.ts",
+    "math-server": "node --loader ts-node/esm --experimental-specifier-resolution=node src/servers/math-server.ts",
+    "start": "npm run host"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
   }
 }

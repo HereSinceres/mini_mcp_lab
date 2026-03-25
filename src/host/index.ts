@@ -1,17 +1,18 @@
-import fs from "node:fs";
-import path from "node:path";
-import readline from "node:readline/promises";
-import { stdin as input, stdout as output } from "node:process";
-import { McpClient } from "./mcp-client.js";
-import { ThreadStore } from "./thread-store.js";
-import { loadSkills } from "./skill-loader.js";
-import { buildPlannerTools } from "./planner-tools.js";
-import { ResponsesClient } from "./responses-client.js";
-import { AgentRuntime } from "./agent.js";
+import fs from "fs";
+import path from "path";
+import readline from "readline/promises";
+import { stdin as input, stdout as output } from "process";
+import { McpClient } from "./mcp-client";
+import { ThreadStore } from "./thread-store";
+import { loadSkills } from "./skill-loader";
+import { buildPlannerTools } from "./planner-tools";
+import { ResponsesClient } from "./responses-client";
+import { AgentRuntime } from "./agent";
 
 loadEnvFile();
 
 async function main() {
+  const useTsRuntime = import.meta.url.endsWith(".ts");
   const rl = readline.createInterface({ input, output });
   const threadStore = new ThreadStore();
   const skills = loadSkills();
@@ -22,13 +23,13 @@ async function main() {
       id: "fs",
       label: "filesystem",
       command: process.execPath,
-      args: [path.resolve("src/servers/fs-server.js")],
+      args: resolveServerArgs("fs-server", useTsRuntime),
     }),
     new McpClient({
       id: "math",
       label: "math",
       command: process.execPath,
-      args: [path.resolve("src/servers/math-server.js")],
+      args: resolveServerArgs("math-server", useTsRuntime),
     }),
   ];
 
@@ -102,7 +103,7 @@ async function main() {
       console.log("\n[assistant]");
       console.log(result.assistant);
       console.log("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("[error]", err.message);
       console.log("");
     }
@@ -114,7 +115,20 @@ async function main() {
   rl.close();
 }
 
-function loadEnvFile() {
+function resolveServerArgs(serverName: string, useTsRuntime: boolean): string[] {
+  if (useTsRuntime) {
+    return [
+      "--loader",
+      "ts-node/esm",
+      "--experimental-specifier-resolution=node",
+      path.resolve(`src/servers/${serverName}.ts`),
+    ];
+  }
+
+  return [path.resolve(`dist/servers/${serverName}.js`)];
+}
+
+function loadEnvFile(): void {
   const envPath = path.resolve(".env");
   if (!fs.existsSync(envPath)) return;
 
@@ -135,7 +149,7 @@ function loadEnvFile() {
   }
 }
 
-function stripQuotes(s) {
+function stripQuotes(s: string): string {
   if (
     (s.startsWith('"') && s.endsWith('"')) ||
     (s.startsWith("'") && s.endsWith("'"))

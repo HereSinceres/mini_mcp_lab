@@ -1,1 +1,1 @@
-React Fiber uses lanes\nchildLanes bubble in completeWork
+React Fiber uses lanes

@@ -1,4 +1,10 @@
-export function planWithRules({ userInput, state }) {
+export function planWithRules({
+  userInput,
+  state,
+}: {
+  userInput: string;
+  state: any;
+}): any {
   const text = String(userInput || "").trim();
 
   if (!state || state.step === 0) {
@@ -147,7 +153,7 @@ export function planWithRules({ userInput, state }) {
   };
 }
 
-function summarizeText(text) {
+function summarizeText(text: string): string {
   const lines = String(text)
     .split(/\r?\n/)
     .map((x) => x.trim())
@@ -168,7 +174,7 @@ function summarizeText(text) {
   return bullets.join("\n");
 }
 
-function extractKeywords(text) {
+function extractKeywords(text: string): string[] {
   const stop = new Set([
     "the",
     "and",

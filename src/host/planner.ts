@@ -1,4 +1,10 @@
-export function planInput({ userInput, skills }) {
+export function planInput({
+  userInput,
+  skills,
+}: {
+  userInput: string;
+  skills: any[];
+}): any {
   const text = String(userInput || "").trim();
 
   if (/^(tools)$/i.test(text)) {
@@ -95,15 +101,15 @@ export function planInput({ userInput, skills }) {
   };
 }
 
-function matchSkill(text, skills) {
+function matchSkill(text: string, skills: any[]): any {
   return (
-    skills.find((skill) => {
+    skills.find((skill: any) => {
       return text.startsWith(skill.trigger);
     }) || null
   );
 }
 
-function extractSkillArgs(text, skill) {
+function extractSkillArgs(text: string, skill: any): any {
   const raw = text.slice(skill.trigger.length).trim();
 
   if (skill.name === "summarize_file") {

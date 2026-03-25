@@ -1,7 +1,15 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
-export function loadSkills() {
+interface Skill {
+  name: string;
+  trigger: string;
+  description: string;
+  tools: string[];
+  prompt: string;
+}
+
+export function loadSkills(): Skill[] {
   const skillsRoot = path.resolve(process.cwd(), "skills");
   if (!fs.existsSync(skillsRoot)) return [];
 
@@ -19,7 +27,7 @@ export function loadSkills() {
 
     return {
       ...config,
-      prompt
+      prompt,
     };
   });
 }

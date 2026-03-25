@@ -1,20 +1,32 @@
 import path from "node:path";
-import { readJsonFile, writeJsonFile, rid, nowIso } from "../shared/utils.js";
+import { readJsonFile, writeJsonFile, rid, nowIso } from "../shared/utils";
 
-const STORE_FILE = path.resolve(process.cwd(), ".agent-state/threads.json");
+const STORE_FILE = path.resolve(process.cwd(), ".agent-state/threadson");
+
+interface Thread {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  turns: any[];
+}
+
+interface Database {
+  threads: Thread[];
+}
 
 export class ThreadStore {
-  async load() {
+  async load(): Promise<Database> {
     return readJsonFile(STORE_FILE, { threads: [] });
   }
 
-  async save(data) {
+  async save(data: Database): Promise<void> {
     await writeJsonFile(STORE_FILE, data);
   }
 
-  async createThread(title = "Untitled Thread") {
+  async createThread(title: string = "Untitled Thread"): Promise<Thread> {
     const db = await this.load();
-    const thread = {
+    const thread: Thread = {
       id: rid("thread"),
       title,
       createdAt: nowIso(),
@@ -26,7 +38,7 @@ export class ThreadStore {
     return thread;
   }
 
-  async appendTurn(threadId, turn) {
+  async appendTurn(threadId: string, turn: any): Promise<any> {
     const db = await this.load();
     const thread = db.threads.find((t) => t.id === threadId);
     if (!thread) throw new Error(`Thread not found: ${threadId}`);
@@ -43,7 +55,7 @@ export class ThreadStore {
     return item;
   }
 
-  async listThreads() {
+  async listThreads(): Promise<Thread[]> {
     const db = await this.load();
     return db.threads;
   }

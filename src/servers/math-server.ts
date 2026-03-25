@@ -1,7 +1,7 @@
-import { JsonRpcPeer } from "../shared/jsonrpc.js";
-import { METHODS, NOTIFICATIONS } from "../shared/protocol.js";
+import { JsonRpcPeer } from "../shared/jsonrpc";
+import { METHODS, NOTIFICATIONS } from "../shared/protocol";
 
-function safeEval(expr) {
+function safeEval(expr: string): number {
   if (!/^[\d\s+\-*/().]+$/.test(expr)) {
     throw new Error("Only numbers and + - * / ( ) are allowed");
   }
@@ -11,18 +11,18 @@ function safeEval(expr) {
 const peer = new JsonRpcPeer({
   input: process.stdin,
   output: process.stdout,
-  onError: (...args) => console.error(...args)
+  onError: (...args) => console.error(...args),
 });
 
 peer.register(METHODS.INITIALIZE, async (params) => {
   peer.notify(NOTIFICATIONS.LOG, {
     level: "info",
-    message: `math-server initialized by ${params?.clientInfo?.name || "unknown"}`
+    message: `math-server initialized by ${params?.clientInfo?.name || "unknown"}`,
   });
 
   return {
     serverInfo: { name: "math-server", version: "5.0.0" },
-    capabilities: { tools: true }
+    capabilities: { tools: true },
   };
 });
 
@@ -34,10 +34,10 @@ peer.register(METHODS.TOOLS_LIST, async () => ({
       inputSchema: {
         type: "object",
         properties: { expression: { type: "string" } },
-        required: ["expression"]
-      }
-    }
-  ]
+        required: ["expression"],
+      },
+    },
+  ],
 }));
 
 peer.register(METHODS.TOOLS_CALL, async (params) => {
@@ -54,7 +54,7 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
   return {
     content: {
       expression: args.expression,
-      value
-    }
+      value,
+    },
   };
 });

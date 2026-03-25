@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { JsonRpcPeer } from "../shared/jsonrpc.js";
-import { METHODS, NOTIFICATIONS } from "../shared/protocol.js";
+import { JsonRpcPeer } from "../shared/jsonrpc";
+import { METHODS, NOTIFICATIONS } from "../shared/protocol";
 
-const DB_FILE = path.resolve(process.cwd(), ".notes-db.json");
+const DB_FILE = path.resolve(process.cwd(), ".notes-dbon");
 
 async function readDb() {
   try {
@@ -14,7 +14,7 @@ async function readDb() {
   }
 }
 
-async function writeDb(db) {
+async function writeDb(db: any): Promise<void> {
   await fs.writeFile(DB_FILE, JSON.stringify(db, null, 2), "utf8");
 }
 
@@ -112,7 +112,7 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
     const keyword = String(args.keyword || "").toLowerCase();
     result = {
       content: db.notes.filter(
-        (n) =>
+        (n: any) =>
           n.title.toLowerCase().includes(keyword) ||
           n.content.toLowerCase().includes(keyword),
       ),

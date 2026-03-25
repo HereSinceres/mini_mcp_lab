@@ -1,14 +1,39 @@
-import { safeJsonParse, stripMarkdownFence } from "../shared/utils.js";
+import { safeJsonParse, stripMarkdownFence } from "../shared/utils";
+
+interface ResponsesClientOptions {
+  apiKey: string;
+  baseUrl: string;
+  model: string;
+  useRealModel?: boolean;
+}
 
 export class ResponsesClient {
-  constructor({ apiKey, baseUrl, model, useRealModel = false }) {
+  apiKey: string;
+  baseUrl: string;
+  model: string;
+  useRealModel: boolean;
+
+  constructor({
+    apiKey,
+    baseUrl,
+    model,
+    useRealModel = false,
+  }: ResponsesClientOptions) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.model = model;
     this.useRealModel = useRealModel;
   }
 
-  async createPlannerResponse({ systemPrompt, userInput, tools }) {
+  async createPlannerResponse({
+    systemPrompt,
+    userInput,
+    tools,
+  }: {
+    systemPrompt: string;
+    userInput: string;
+    tools: any[];
+  }): Promise<any> {
     if (!this.useRealModel) {
       return this.#mockPlanner(userInput);
     }
@@ -46,14 +71,14 @@ export class ResponsesClient {
     return response.json();
   }
 
-  extractToolCalls(responseJson) {
+  extractToolCalls(responseJson: any): any[] {
     const output = Array.isArray(responseJson?.output)
       ? responseJson.output
       : [];
 
     return output
-      .filter((item) => item?.type === "function_call")
-      .map((item) => ({
+      .filter((item: any) => item?.type === "function_call")
+      .map((item: any) => ({
         id:
           item.call_id ||
           item.id ||
@@ -63,7 +88,7 @@ export class ResponsesClient {
       }));
   }
 
-  extractOutputText(responseJson) {
+  extractOutputText(responseJson: any): string {
     if (
       typeof responseJson?.output_text === "string" &&
       responseJson.output_text.trim()
@@ -74,12 +99,20 @@ export class ResponsesClient {
     const output = Array.isArray(responseJson?.output)
       ? responseJson.output
       : [];
-    const message = output.find((item) => item?.type === "message");
-    const textPart = message?.content?.find((c) => c?.type === "output_text");
+    const message = output.find((item: any) => item?.type === "message");
+    const textPart = message?.content?.find(
+      (c: any) => c?.type === "output_text",
+    );
     return textPart?.text?.trim() || "";
   }
 
-  async continueAfterToolCalls({ previousResponseId, toolOutputs }) {
+  async continueAfterToolCalls({
+    previousResponseId,
+    toolOutputs,
+  }: {
+    previousResponseId: string;
+    toolOutputs: any[];
+  }): Promise<any> {
     if (!this.useRealModel) {
       return this.#mockAfterTools(toolOutputs);
     }
@@ -111,7 +144,7 @@ export class ResponsesClient {
     return response.json();
   }
 
-  #mockPlanner(userInput) {
+  #mockPlanner(userInput: string): any {
     const text = String(userInput || "").trim();
 
     if (/^(tools)$/i.test(text)) {
@@ -321,7 +354,7 @@ export class ResponsesClient {
     };
   }
 
-  #mockAfterTools(toolOutputs) {
+  #mockAfterTools(toolOutputs: any[]): any {
     const first = toolOutputs[0];
     const output = first?.output;
 

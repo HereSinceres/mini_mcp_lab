@@ -1,4 +1,11 @@
-export function buildPlannerTools(skills) {
+interface Skill {
+  name: string;
+  trigger: string;
+  description: string;
+  tools: string[];
+}
+
+export function buildPlannerTools(skills: Skill[]): any[] {
   return [
     {
       type: "function",

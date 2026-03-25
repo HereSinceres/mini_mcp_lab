@@ -1,11 +1,11 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { JsonRpcPeer } from "../shared/jsonrpc.js";
-import { METHODS, NOTIFICATIONS } from "../shared/protocol.js";
+import fs from "fs/promises";
+import path from "path";
+import { JsonRpcPeer } from "../shared/jsonrpc";
+import { METHODS, NOTIFICATIONS } from "../shared/protocol";
 
 const ROOT = path.resolve(process.cwd(), "workspace");
 
-function assertSafePath(inputPath) {
+function assertSafePath(inputPath: string): string {
   const full = path.resolve(ROOT, inputPath || ".");
   if (!full.startsWith(ROOT)) {
     throw new Error("Path escapes workspace");
@@ -16,20 +16,20 @@ function assertSafePath(inputPath) {
 const peer = new JsonRpcPeer({
   input: process.stdin,
   output: process.stdout,
-  onError: (...args) => console.error(...args)
+  onError: (...args: any[]) => console.error(...args),
 });
 
-peer.register(METHODS.INITIALIZE, async (params) => {
+peer.register(METHODS.INITIALIZE, async (params: any) => {
   await fs.mkdir(ROOT, { recursive: true });
 
   peer.notify(NOTIFICATIONS.LOG, {
     level: "info",
-    message: `fs-server initialized by ${params?.clientInfo?.name || "unknown"}`
+    message: `fs-server initialized by ${params?.clientInfo?.name || "unknown"}`,
   });
 
   return {
     serverInfo: { name: "fs-server", version: "5.0.0" },
-    capabilities: { tools: true }
+    capabilities: { tools: true },
   };
 });
 
@@ -40,8 +40,8 @@ peer.register(METHODS.TOOLS_LIST, async () => ({
       description: "List files under a workspace-relative directory",
       inputSchema: {
         type: "object",
-        properties: { dir: { type: "string" } }
-      }
+        properties: { dir: { type: "string" } },
+      },
     },
     {
       name: "read_file",
@@ -49,8 +49,8 @@ peer.register(METHODS.TOOLS_LIST, async () => ({
       inputSchema: {
         type: "object",
         properties: { path: { type: "string" } },
-        required: ["path"]
-      }
+        required: ["path"],
+      },
     },
     {
       name: "write_file",
@@ -59,10 +59,10 @@ peer.register(METHODS.TOOLS_LIST, async () => ({
         type: "object",
         properties: {
           path: { type: "string" },
-          content: { type: "string" }
+          content: { type: "string" },
         },
-        required: ["path", "content"]
-      }
+        required: ["path", "content"],
+      },
     },
     {
       name: "append_file",
@@ -71,12 +71,12 @@ peer.register(METHODS.TOOLS_LIST, async () => ({
         type: "object",
         properties: {
           path: { type: "string" },
-          content: { type: "string" }
+          content: { type: "string" },
         },
-        required: ["path", "content"]
-      }
-    }
-  ]
+        required: ["path", "content"],
+      },
+    },
+  ],
 }));
 
 peer.register(METHODS.TOOLS_CALL, async (params) => {
@@ -92,8 +92,8 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
     result = {
       content: items.map((item) => ({
         name: item.name,
-        type: item.isDirectory() ? "dir" : "file"
-      }))
+        type: item.isDirectory() ? "dir" : "file",
+      })),
     };
   } else if (name === "read_file") {
     const file = assertSafePath(args.path);
@@ -107,8 +107,8 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
       content: {
         ok: true,
         path: args.path,
-        bytes: Buffer.byteLength(args.content)
-      }
+        bytes: Buffer.byteLength(args.content),
+      },
     };
   } else if (name === "append_file") {
     const file = assertSafePath(args.path);
@@ -118,8 +118,8 @@ peer.register(METHODS.TOOLS_CALL, async (params) => {
       content: {
         ok: true,
         path: args.path,
-        appendedBytes: Buffer.byteLength(args.content)
-      }
+        appendedBytes: Buffer.byteLength(args.content),
+      },
     };
   } else {
     throw new Error(`Unknown tool: ${name}`);

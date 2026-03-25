@@ -1,6 +1,25 @@
-import { clipText, pretty, safeJsonParse } from "../shared/utils.js";
+import { clipText, pretty, safeJsonParse } from "../shared/utils";
+import { McpClient } from "./mcp-client";
+import { ThreadStore } from "./thread-store";
+import { ResponsesClient } from "./responses-client";
+
+interface AgentRuntimeOptions {
+  clients: McpClient[];
+  threadStore: ThreadStore;
+  skills: any[];
+  responsesClient: ResponsesClient;
+  plannerTools: any[];
+  askApproval: (message: string) => Promise<boolean>;
+}
 
 export class AgentRuntime {
+  clients: McpClient[];
+  threadStore: ThreadStore;
+  skills: any[];
+  responsesClient: ResponsesClient;
+  plannerTools: any[];
+  askApproval: (message: string) => Promise<boolean>;
+
   constructor({
     clients,
     threadStore,
@@ -8,7 +27,7 @@ export class AgentRuntime {
     responsesClient,
     plannerTools,
     askApproval,
-  }) {
+  }: AgentRuntimeOptions) {
     this.clients = clients;
     this.threadStore = threadStore;
     this.skills = skills;
@@ -17,7 +36,7 @@ export class AgentRuntime {
     this.askApproval = askApproval;
   }
 
-  getToolCatalog() {
+  getToolCatalog(): any[] {
     const rows = [];
     for (const client of this.clients) {
       for (const tool of client.tools) {
@@ -31,11 +50,11 @@ export class AgentRuntime {
     return rows;
   }
 
-  findClientForTool(toolName) {
+  findClientForTool(toolName: string): McpClient | null {
     return this.clients.find((c) => c.hasTool(toolName)) || null;
   }
 
-  buildSystemPrompt() {
+  buildSystemPrompt(): string {
     return [
       "You are the planner for a local coding agent.",
       "Prefer using tools or skills when they clearly help.",
@@ -49,8 +68,14 @@ export class AgentRuntime {
     ].join("\n");
   }
 
-  async runTurn({ threadId, userInput }) {
-    const steps = [];
+  async runTurn({
+    threadId,
+    userInput,
+  }: {
+    threadId: string;
+    userInput: string;
+  }): Promise<any> {
+    const steps: any[] = [];
 
     const initial = await this.responsesClient.createPlannerResponse({
       systemPrompt: this.buildSystemPrompt(),
@@ -76,7 +101,7 @@ export class AgentRuntime {
       return { steps, assistant };
     }
 
-    const toolOutputs = [];
+    const toolOutputs: any[] = [];
 
     for (const call of toolCalls) {
       steps.push({ kind: "functionCall", value: call });
@@ -106,7 +131,7 @@ export class AgentRuntime {
     return { steps, assistant };
   }
 
-  async executeFunctionCall(call, steps) {
+  async executeFunctionCall(call: any, steps: any[]): Promise<any> {
     const name = call.name;
     const args = call.arguments || {};
 
@@ -140,7 +165,11 @@ export class AgentRuntime {
     return this.runLowLevelTool(name, args, steps);
   }
 
-  async runSkill(skillName, rawInput, steps) {
+  async runSkill(
+    skillName: string,
+    rawInput: string,
+    steps: any[],
+  ): Promise<any> {
     const skill = this.skills.find((s) => s.name === skillName);
     if (!skill) {
       throw new Error(`Skill not found: ${skillName}`);
@@ -192,7 +221,11 @@ export class AgentRuntime {
     throw new Error(`Skill logic not implemented: ${skill.name}`);
   }
 
-  async runLowLevelTool(toolName, args, steps) {
+  async runLowLevelTool(
+    toolName: string,
+    args: any,
+    steps: any[],
+  ): Promise<any> {
     const client = this.findClientForTool(toolName);
     if (!client) {
       throw new Error(`No MCP server provides tool: ${toolName}`);
@@ -226,17 +259,17 @@ export class AgentRuntime {
   }
 }
 
-function summarizeModelResponse(resp) {
+function summarizeModelResponse(resp: any): any {
   return {
     id: resp?.id || null,
     output_text: resp?.output_text || "",
     output_types: Array.isArray(resp?.output)
-      ? resp.output.map((x) => x.type)
+      ? resp.output.map((x: any) => x.type)
       : [],
   };
 }
 
-function normalizeToolResult(result) {
+function normalizeToolResult(result: any): any {
   if (!result) return result;
   if (typeof result.content === "string") {
     return { ...result, content: clipText(result.content, 8000) };
@@ -244,7 +277,7 @@ function normalizeToolResult(result) {
   return result;
 }
 
-function summarizeText(text) {
+function summarizeText(text: string): string {
   const lines = String(text)
     .split(/\r?\n/)
     .map((x) => x.trim())
@@ -264,7 +297,7 @@ function summarizeText(text) {
   ].join("\n");
 }
 
-function extractKeywords(text) {
+function extractKeywords(text: string): string[] {
   const stop = new Set([
     "the",
     "and",
